@@ -1,1 +1,5 @@
 target/
+
+# Eclipse / JDT / Scala IDE
+.worksheet/
+.cache
