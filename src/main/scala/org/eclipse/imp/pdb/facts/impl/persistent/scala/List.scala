@@ -26,62 +26,56 @@ import org.eclipse.imp.pdb.facts.visitors.VisitorException
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
-case class List(eltType: Type, content: collection.immutable.List[IValue])
-  extends Value(TypeFactory.getInstance.listType(eltType)) with IList {
+case class List(t: Type, xs: collection.immutable.List[IValue])
+  extends Value(TypeFactory.getInstance listType t) with IList {
 
-  private lazy val fHash: Int = content.hashCode();
+  private lazy val hash: Int = xs.hashCode;
 
-  private def lub(e: IValue): Type = e.getType.lub(eltType)
-  private def lub(e: IList): Type = e.getElementType.lub(eltType)
+  private def lub(e: IValue) = t lub e.getType
+  private def lub(e: IList) = t lub e.getElementType
 
-  def getElementType: Type = eltType
+  def getElementType = t
 
-  def length(): Int = content length
+  def length = xs length
 
-  def reverse() = List(eltType, content.reverse)
+  def reverse = List(t, xs.reverse)
 
-  def append(e: IValue) = List(this lub e, content :+ e)
+  def append(x: IValue) = List(this lub x, xs :+ x)
 
-  def insert(e: IValue) = List(this lub e, e :: content)
+  def insert(x: IValue) = List(this lub x, x :: xs)
 
-  // TODO: optimal implementation?
-  def concat(o: IList) = List(this lub o, content ::: (for (e <- o) yield e).toList)
-
-  def put(i: Int, e: IValue) = List(this lub e, content updated (i, e))
-
-  def get(i: Int) = content(i)
-
-  def sublist(offset: Int, length: Int) = List(eltType, content slice (offset, offset + length))
-
-  def isEmpty: Boolean = content isEmpty
-
-  def contains(e: IValue): Boolean = content contains e
-
-  def delete(e: IValue) = content indexOf (e) match {
-    case -1 => this
-    case index => delete(index)
+  def concat(other: IList) = other match {
+    case List(_, ys) => List(this lub other, xs ::: ys)
   }
 
-  def delete(i: Int) = {
-    val updated = (content take i) ::: (content drop i + 1)
-    List(eltType, updated)
+  def put(i: Int, x: IValue) = List(this lub x, xs updated (i, x))
+
+  def get(i: Int) = xs(i)
+
+  def sublist(i: Int, n: Int) = List(t, xs slice (i, i + n))
+
+  def isEmpty = xs isEmpty
+
+  def contains(e: IValue) = xs contains e
+
+  def delete(x: IValue) = xs indexOf (x) match {
+    case i => if (i == -1) this else delete(i)
   }
 
-  def iterator(): java.util.Iterator[IValue] = content.iterator
+  def delete(i: Int) = List(t, (xs take i) ::: (xs drop i + 1))
 
-  def accept[T](v: IValueVisitor[T]): T = v.visitList(this)
+  def iterator = xs iterator
 
-  override def equals(o: Any): Boolean = {
-    if (getClass() == o.getClass()) {
-      val other = o.asInstanceOf[List];
+  def accept[T](v: IValueVisitor[T]): T = v visitList this
 
-      if (length() == 0 && other.length() == 0) return true;
-
-      return fType.comparable(other.fType) && content.equals(other.content);
+  override def equals(that: Any): Boolean = that match {
+    case other: List => {
+      if (this.xs == Nil && other.xs == Nil) true
+      else (this.fType comparable other.fType) && (this.xs equals other.xs)
     }
-    return false;
+    case _ => false
   }
 
-  override def hashCode(): Int = fHash
-  
+  override def hashCode = hash
+
 }
