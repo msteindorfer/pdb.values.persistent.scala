@@ -23,40 +23,49 @@ import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.visitors.VisitorException
 
+import collection.immutable.List.empty
 import collection.mutable.ListBuffer
 import collection.JavaConversions.iterableAsScalaIterable
 
-// TODO: DRY for method implementations
 // TODO: type inference, if type not given
-case class ListWriter(eltType: Type) extends IListWriter {
-  
-  val content: ListBuffer[IValue] = ListBuffer()
-  
-  def this() = this(TypeFactory.getInstance.voidType)
-  
-  def insert(elems: IValue*): Unit = elems ++=: content
-  
-  def insert(elems: Array[IValue], start: Int, length: Int): Unit = (elems slice(start, start + length)) ++=: content 
+case class ListWriter(t: Type) extends IListWriter {
 
-  def insertAll(elems: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]): Unit = content prependAll elems
+  val xs = ListBuffer[IValue]()
 
-  def insertAt(index: Int, elems: IValue*): Unit = content.insertAll(index, elems)
+  def this() = this(TypeFactory.getInstance voidType)
 
-  def insertAt(index: Int, elems: Array[IValue], start: Int, length: Int): Unit = content.insertAll(index, (elems slice(start, start + length)))
+  //		ListWriter(Type eltType) {
+  //			super();
+  //			this.inferred = false;
+  //		}
+  //		
+  //		ListWriter {
+  //			super()
+  //			inferred = true;
+  //		}  
 
-  def replaceAt(index: Int, elem: IValue): Unit = content update (index, elem)
+  def insert(ys: IValue*) = ys ++=: xs
 
-  def append(elems: IValue*): Unit = content ++= elems
+  def insert(ys: Array[IValue], i: Int, n: Int) = (ys slice (i, i + n)) ++=: xs
 
-  def appendAll(elems: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]): Unit = content appendAll elems
+  def insertAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs prependAll ys
 
-  def delete(elem: IValue): Unit = content indexOf (elem) match {
-    case -1 => this
-    case index => delete(index)
+  def insertAt(i: Int, ys: IValue*) = xs insertAll (i, ys)
+
+  def insertAt(i: Int, ys: Array[IValue], j: Int, n: Int) = xs insertAll (i, (ys slice (j, j + n)))
+
+  def replaceAt(i: Int, x: IValue) = xs update (i, x)
+
+  def append(ys: IValue*) = xs ++= ys
+
+  def appendAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs appendAll ys
+
+  def delete(x: IValue) = xs indexOf x match {
+    case i => if (i == -1) this else delete(i)
   }
-  
-  def delete(i: Int): Unit = content.remove(i)
 
-  def done(): IList = List(eltType, collection.immutable.List.empty ++ content)
+  def delete(i: Int) = xs remove i
+
+  def done = List(t, empty ++ xs)
 
 }
