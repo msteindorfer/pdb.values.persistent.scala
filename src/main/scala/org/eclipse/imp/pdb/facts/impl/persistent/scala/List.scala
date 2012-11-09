@@ -26,6 +26,7 @@ import org.eclipse.imp.pdb.facts.visitors.VisitorException
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
+// TODO: type inference, if type not given
 case class List(t: Type, xs: collection.immutable.List[IValue])
   extends Value(TypeFactory.getInstance listType t) with IList {
 
@@ -58,7 +59,7 @@ case class List(t: Type, xs: collection.immutable.List[IValue])
 
   def contains(e: IValue) = xs contains e
 
-  def delete(x: IValue) = xs indexOf (x) match {
+  def delete(x: IValue) = xs indexOf x match {
     case i => if (i == -1) this else delete(i)
   }
 
