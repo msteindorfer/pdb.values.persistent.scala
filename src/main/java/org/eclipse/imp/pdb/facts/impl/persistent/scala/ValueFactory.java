@@ -213,11 +213,11 @@ public class ValueFactory extends BaseValueFactory {
 	public IMapWriter mapWriter(Type keyType, Type valueType) {
 		checkNull(keyType);
 		checkNull(valueType);
-		return Map.createMapWriter(keyType, valueType);
+		return new MapWriter(keyType, valueType);
 	}
 	
 	public IMapWriter mapWriter() {
-		return Map.createMapWriter();
+		return new MapWriter();
 	}
 
 	public IString string(int[] chars) {
