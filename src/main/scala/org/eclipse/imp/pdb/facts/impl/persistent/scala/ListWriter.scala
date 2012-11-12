@@ -44,7 +44,7 @@ case class ListWriter(t: Type) extends IListWriter {
   //			inferred = true;
   //		}  
 
-  def insert(ys: IValue*) = ys ++=: xs
+  def insert(ys: IValue*): Unit = ys ++=: xs
 
   def insert(ys: Array[IValue], i: Int, n: Int) = (ys slice (i, i + n)) ++=: xs
 
@@ -56,7 +56,7 @@ case class ListWriter(t: Type) extends IListWriter {
 
   def replaceAt(i: Int, x: IValue) = xs update (i, x)
 
-  def append(ys: IValue*) = xs ++= ys
+  def append(ys: IValue*): Unit = xs ++= ys
 
   def appendAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs appendAll ys
 
