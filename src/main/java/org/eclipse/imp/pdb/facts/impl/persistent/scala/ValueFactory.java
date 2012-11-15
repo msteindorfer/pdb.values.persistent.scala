@@ -78,11 +78,11 @@ public class ValueFactory extends BaseValueFactory {
 	
 	public IRelationWriter relationWriter(Type tupleType) {
 		checkNull(tupleType);
-		return Relation.createRelationWriter(tupleType);
+		return new RelationWriter(tupleType);
 	}
 	
 	public IRelationWriter relationWriter() {
-		return Relation.createRelationWriter();
+		return new RelationWriterWithTypeInference();
 	}
 
 	public ISet set(Type eltType){
@@ -96,11 +96,11 @@ public class ValueFactory extends BaseValueFactory {
 			return relationWriter(eltType);
 		}
 		
-		return Set.createSetWriter(eltType);
+		return new SetWriter(eltType);
 	}
 	
 	public ISetWriter setWriter() {
-		return Set.createSetWriter();
+		return new SetWriterWithTypeInference();
 	}
 
 	public ISet set(IValue... elems) throws FactTypeUseException {
@@ -144,7 +144,7 @@ public class ValueFactory extends BaseValueFactory {
 	}
 
 	public ITuple tuple() {
-		return new Tuple(new IValue[0]);
+		return new Tuple();
 	}
 	
 	public ITuple tuple(IValue... args) {
