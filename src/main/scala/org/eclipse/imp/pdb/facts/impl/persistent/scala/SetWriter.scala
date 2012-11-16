@@ -39,22 +39,11 @@ class SetWriter(var t: Type) extends ISetWriter {
 }
 
 class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
-  
+    
   override def insert(ys: IValue*) { ys foreach updateType ; super.insert(ys: _*) }       
       
   override def insertAll(ys: java.lang.Iterable[_ <: IValue]) { ys foreach updateType ; super.insertAll(ys) }   
   
   private def updateType(x: IValue) = t = t lub x.getType  
-  
-  override def done = if (t.isTupleType && !t.isVoidType) Relation(t, xs) else super.done() 
-  
-//  			if(constructedSet == null){
-//				if (inferred && eltType.isTupleType() && !eltType.isVoidType()) {
-//					constructedSet = new Relation(eltType, setContent);
-//				}
-//				else {
-//					constructedSet = new Set(TypeFactory.getInstance().setType(eltType), setContent);
-//				}
-//			}
-//			return  constructedSet;  
+
 }

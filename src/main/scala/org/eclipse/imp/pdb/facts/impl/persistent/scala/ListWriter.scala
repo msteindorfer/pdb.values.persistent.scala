@@ -27,32 +27,20 @@ import collection.immutable.List.empty
 import collection.mutable.ListBuffer
 import collection.JavaConversions.iterableAsScalaIterable
 
-// TODO: type inference, if type not given
-case class ListWriter(t: Type) extends IListWriter {
+// TODO: fix var t in constructor
+class ListWriter(var t: Type) extends IListWriter {
 
   val xs = ListBuffer[IValue]()
 
-  def this() = this(TypeFactory.getInstance voidType)
-
-  //		ListWriter(Type eltType) {
-  //			super();
-  //			this.inferred = false;
-  //		}
-  //		
-  //		ListWriter {
-  //			super()
-  //			inferred = true;
-  //		}  
-
   def insert(ys: IValue*): Unit = ys ++=: xs
 
-  def insert(ys: Array[IValue], i: Int, n: Int) = (ys slice (i, i + n)) ++=: xs
+  def insert(ys: Array[IValue], i: Int, n: Int) = this insert ((ys slice (i, i + n)): _*)
 
   def insertAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs prependAll ys
 
   def insertAt(i: Int, ys: IValue*) = xs insertAll (i, ys)
 
-  def insertAt(i: Int, ys: Array[IValue], j: Int, n: Int) = xs insertAll (i, (ys slice (j, j + n)))
+  def insertAt(i: Int, ys: Array[IValue], j: Int, n: Int) = this insertAt (i, (ys slice (j, j + n)): _*)
 
   def replaceAt(i: Int, x: IValue) = xs update (i, x)
 
@@ -67,5 +55,29 @@ case class ListWriter(t: Type) extends IListWriter {
   def delete(i: Int) = xs remove i
 
   def done = List(t, empty ++ xs)
+
+}
+
+class ListWriterWithTypeInference() extends ListWriter(TypeFactory.getInstance voidType) {
+
+  override def insertAt(i: Int, ys: IValue*) = xs insertAll (i, ys)
+
+//  // covered by insertAt(i: Int, ys: IValue*) w.r.t. implementation 
+//  def insertAt(i: Int, ys: Array[IValue], j: Int, n: Int)
+
+  override def replaceAt(i: Int, x: IValue) = { updateType(x) ; super.replaceAt(i, x) }
+
+  override def append(ys: IValue*): Unit = { ys foreach updateType ; super.append(ys: _*) }   
+
+  override def appendAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = { ys foreach updateType ; super.appendAll(ys) } 
+  
+  override def insert(ys: IValue*) { ys foreach updateType ; super.insert(ys: _*) }       
+
+//  // covered by insert(ys: IValue*) w.r.t. implementation
+//  def insert(ys: Array[IValue], i: Int, n: Int)
+    
+  override def insertAll(ys: java.lang.Iterable[_ <: IValue]) { ys foreach updateType ; super.insertAll(ys) }   
+
+  private def updateType(x: IValue) = t = t lub x.getType
 
 }

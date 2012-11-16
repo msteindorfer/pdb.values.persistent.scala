@@ -1,5 +1,4 @@
-/**
- * *****************************************************************************
+/*******************************************************************************
  * Copyright (c) 2012 CWI
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,9 +7,8 @@
  *
  * Contributors:
  *
- *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI
- * *****************************************************************************
- */
+ *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI  
+ *******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.impl.Value
@@ -89,7 +87,7 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
   def accept[T](v: IValueVisitor[T]): T = v visitMap this
 
   override def equals(that: Any): Boolean = that match {
-    case other: List => this.xs equals other.xs
+    case other: Map => this.xs equals other.xs
     case _ => false
   }
 

@@ -31,24 +31,78 @@ import collection.JavaConversions.iterableAsScalaIterable
 
 // TODO: specialize class for ITuple
 // TODO: remove duplicated SetOrRel duplicates [Set replaced by relation in return type]
-case class Relation(override val t: Type, override val xs: collection.immutable.Set[IValue])
-  extends Set(TypeFactory.getInstance relTypeFromTuple t, xs) with IRelation {
+case class Relation(t: Type, xs: collection.immutable.Set[IValue])
+  extends Value(TypeFactory.getInstance relTypeFromTuple t) with IRelation {
 
-  override def insert[SetOrRel <: ISet](x: IValue) = Relation(this lub x, xs + x).asInstanceOf[SetOrRel]  
+  private lazy val hash: Int = xs.hashCode;
+    
+  protected def lub(e: IValue) = t lub e.getType
+  protected def lub(e: ISet) = t lub e.getElementType    
   
-  override def delete[SetOrRel <: ISet](x: IValue) = Relation(this lub x, xs - x).asInstanceOf[SetOrRel]  
+  def getElementType = t
+
+  def isEmpty = xs isEmpty
+
+  def size = xs size
+
+  def contains(x: IValue) = xs contains x  
   
-  override def union[SetOrRel <: ISet](other: ISet) = other match {
+  def insert[SetOrRel <: ISet](x: IValue) = Relation(this lub x, xs + x).asInstanceOf[SetOrRel]  
+  
+  def delete[SetOrRel <: ISet](x: IValue) = Relation(this lub x, xs - x).asInstanceOf[SetOrRel]  
+  
+  def union[SetOrRel <: ISet](other: ISet) = other match {
     case Set(ot, ys) => Relation(t lub ot, xs | ys).asInstanceOf[SetOrRel]
+    case Relation(ot, ys) => Relation(t lub ot, xs | ys).asInstanceOf[SetOrRel]
   }
 
-  override def intersect[SetOrRel <: ISet](other: ISet) = other match {
+  def intersect[SetOrRel <: ISet](other: ISet) = other match {
     case Set(ot, ys) => Relation(t lub ot, xs & ys).asInstanceOf[SetOrRel]
+    case Relation(ot, ys) => Relation(t lub ot, xs & ys).asInstanceOf[SetOrRel]
   }
 
-  override def subtract[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(ot, ys) => Relation(t lub ot, xs &~ ys).asInstanceOf[SetOrRel]
+  def subtract[SetOrRel <: ISet](other: ISet) = other match {
+    case Set(_, ys) => Relation(t, xs &~ ys).asInstanceOf[SetOrRel]
+    case Relation(_, ys) => Relation(t, xs &~ ys).asInstanceOf[SetOrRel]
+  }
+  
+  def product(other: ISet): IRelation = {
+    val calculate = (ot: Type, ys: collection.immutable.Set[IValue]) => {
+      val productType = TypeFactory.getInstance tupleType (t, ot)
+      Relation(productType, for (x <- xs; y <- ys) yield new Tuple(x, y))
+    }
+    other match {
+      case Set(ot, ys) => calculate(ot, ys)
+      case Relation(ot, ys) => calculate(ot, ys)
+    }
+  }
+  
+  def isSubsetOf(other: ISet) = other match {
+    case Set(_, ys) => xs subsetOf ys
   }  
+  
+  def iterator = xs iterator
+  
+  override def accept[T](v: IValueVisitor[T]): T = v visitRelation this
+  
+  // TODO: remove duplication
+  override def equals(that: Any): Boolean = that match {
+    case other: Set => {
+      if (this.xs == empty && other.xs == empty) true
+      else (this.t comparable other.t) && (this.xs equals other.xs)
+    }
+    case other: Relation => {
+      if (this.xs == empty && other.xs == empty) true
+      else (this.t comparable other.t) && (this.xs equals other.xs)
+    }    
+    case _ => false
+  }
+  
+  override def hashCode = hash    
+  
+  
+  
+  
   
   def arity = t getArity
 
@@ -57,8 +111,7 @@ case class Relation(override val t: Type, override val xs: collection.immutable.
 		val resultType = getType compose other.getType
 		// an exception will have been thrown if the relations are not both binary and
 		// have a comparable field to compose.
-		val w = ValueFactory.getInstance relationWriter (resultType getFieldTypes);
-
+		
 		val tuples: collection.immutable.Set[IValue] = for {
 		 Tuple(v1) <- this xs;
 		 Tuple(v2) <- other xs; 
@@ -70,6 +123,8 @@ case class Relation(override val t: Type, override val xs: collection.immutable.
   }
 
   def closure: IRelation = {
+	getType closure // will throw exception if not binary and reflexive
+
     var tmp = this;
     var prevCount = 0;
 
@@ -107,6 +162,4 @@ case class Relation(override val t: Type, override val xs: collection.immutable.
   
   def selectByFieldNames(fields: String*) = this select ((for (s <- fields) yield (getFieldTypes getFieldIndex s)): _*) 
 	
-  override def accept[T](v: IValueVisitor[T]): T = v visitRelation this
-
 }
