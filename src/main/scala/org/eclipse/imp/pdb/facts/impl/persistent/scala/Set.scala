@@ -78,7 +78,8 @@ case class Set(t: Type, xs: collection.immutable.Set[IValue])
 
   def isSubsetOf(other: ISet) = other match {
     case Set(_, ys) => xs subsetOf ys
-  }
+    case Relation(_, ys) => xs subsetOf ys
+  }  
 
   def iterator = xs iterator
 

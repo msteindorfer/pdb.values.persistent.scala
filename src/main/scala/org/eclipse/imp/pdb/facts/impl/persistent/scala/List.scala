@@ -53,7 +53,10 @@ case class List(t: Type, xs: collection.immutable.List[IValue])
 
   def get(i: Int) = xs(i)
 
-  def sublist(i: Int, n: Int) = List(t, xs slice (i, i + n))
+  def sublist(i: Int, n: Int) = { 
+    if (i < 0 || n < 0 || i + n > length) { throw new IndexOutOfBoundsException() } /* for compatibility with Rascal test suite */
+    List(t, xs slice (i, i + n))
+  }
 
   def isEmpty = xs isEmpty
 

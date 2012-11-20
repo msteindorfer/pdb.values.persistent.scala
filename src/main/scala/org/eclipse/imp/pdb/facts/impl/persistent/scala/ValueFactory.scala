@@ -59,15 +59,19 @@ class ValueFactory extends BaseValueFactory {
 
   def constructor(t: Type, children: IValue*) = new Constructor(t, collection.immutable.Vector.empty ++ children)
 
-  def constructor(t: Type, annotations: java.util.Map[String, IValue], children: IValue*): IConstructor = new Constructor(t, collection.immutable.Vector.empty ++ children, collection.immutable.Map.empty ++ annotations) 
+  def constructor(t: Type, annotations: java.util.Map[String, IValue], children: IValue*): IConstructor = new Constructor(t, collection.immutable.Vector.empty ++ children, collection.immutable.Map.empty ++ annotations)
 
-  def set(t: Type) = Set(t, collection.immutable.Set.empty)
+  def set(t: Type) = if (t isTupleType) Relation(t, collection.immutable.Set.empty) else Set(t, collection.immutable.Set.empty)
 
-  def set(xs: IValue*) = new Set(this lub xs, collection.immutable.Set.empty ++ xs)
+  def set(ys: IValue*) = {
+    val t = this lub ys
+    val xs = collection.immutable.Set.empty ++ ys
+    if (t isTupleType) new Relation(t, xs) else new Set(t, xs)
+  }
 
   def setWriter = new SetWriterWithTypeInference()
 
-  def setWriter(t: Type) = new SetWriter(t)
+  def setWriter(t: Type) = if (t isTupleType) new RelationWriter(t) else new SetWriter(t)
 
   def list(t: Type) = List(t, Nil)
 
@@ -79,11 +83,11 @@ class ValueFactory extends BaseValueFactory {
 
   def relation(t: Type) = Relation(t, collection.immutable.Set.empty)
 
+  def relation(xs: IValue*) = Relation(this lub xs, collection.immutable.Set.empty ++ xs)
+
   def relationWriter(t: Type) = new RelationWriter(t)
 
   def relationWriter = new RelationWriterWithTypeInference()
-
-  def relation(xs: IValue*) = Relation(this lub xs, collection.immutable.Set.empty ++ xs)
 
   def map(kt: Type, vt: Type) = Map(kt, vt, collection.immutable.Map.empty)
 

@@ -79,6 +79,7 @@ case class Relation(t: Type, xs: collection.immutable.Set[IValue])
   
   def isSubsetOf(other: ISet) = other match {
     case Set(_, ys) => xs subsetOf ys
+    case Relation(_, ys) => xs subsetOf ys
   }  
   
   def iterator = xs iterator
@@ -158,7 +159,11 @@ case class Relation(t: Type, xs: collection.immutable.Set[IValue])
 
   def valuesAtIndex(i: Int): ISet = Set(getType.getFieldType(i), for (Tuple(vs) <- xs) yield vs(i))  
   
-  def select(fields: Int*) = Set(getFieldTypes.select(fields: _*), (for (x <- xs) yield x.asInstanceOf[ITuple] select(fields: _*))) 
+  def select(fields: Int*) = {
+    val t = getFieldTypes.select(fields: _*)
+    val ys = (for (x <- xs) yield x.asInstanceOf[ITuple] select(fields: _*))
+    if (t isTupleType) Relation(t, ys) else Set(t, ys)
+  }
   
   def selectByFieldNames(fields: String*) = this select ((for (s <- fields) yield (getFieldTypes getFieldIndex s)): _*) 
 	

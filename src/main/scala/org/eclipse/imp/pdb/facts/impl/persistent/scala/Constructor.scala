@@ -17,11 +17,12 @@ import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.impl.Value
+import org.eclipse.imp.pdb.facts.`type`.TypeStore
+
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
-import org.eclipse.imp.pdb.facts.`type`.TypeStore
 
 case class Constructor(t: Type, children: collection.immutable.Vector[IValue], annotations: collection.immutable.Map[String, IValue]) extends Value(t) with IConstructor {
     

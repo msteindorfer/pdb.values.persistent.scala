@@ -28,7 +28,7 @@ class SetWriter(var t: Type) extends ISetWriter {
   
   def size = xs size
   
-  def done = Set(t, xs)
+  def done: ISet = Set(t, xs)
 
   def insert(ys: IValue*) { xs = xs ++ ys }       
       
@@ -46,4 +46,6 @@ class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voi
   
   private def updateType(x: IValue) = t = t lub x.getType  
 
+  override def done = if (t isTupleType) Relation(t, xs) else Set(t, xs)
+  
 }

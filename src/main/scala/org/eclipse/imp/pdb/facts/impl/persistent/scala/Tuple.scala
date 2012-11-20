@@ -40,7 +40,12 @@ case class Tuple(xs: Vector[IValue])
 
   def set(l: String, x: IValue) = this set (fType getFieldIndex l, x)
   
-  def select(fields: Int*) = Tuple(empty ++ (for (i <- fields) yield xs(i))) 
+  def select(fields: Int*) = { 
+    if (fType.select(fields: _*) isTupleType)
+      Tuple(empty ++ (for (i <- fields) yield xs(i)))
+    else
+      get(fields(0)) // TODO: ensure that one element is present
+  }
   
   def selectByFieldNames(fields: String*) = this select ((for (s <- fields) yield (fType getFieldIndex s)): _*) 
   
