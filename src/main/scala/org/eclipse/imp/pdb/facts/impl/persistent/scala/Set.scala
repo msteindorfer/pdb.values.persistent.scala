@@ -31,8 +31,6 @@ import collection.JavaConversions.iterableAsScalaIterable
 case class Set(et: Type, xs: collection.immutable.Set[IValue])
   extends Value with ISet {
   
-  private lazy val hash: Int = xs.hashCode;
-
   protected def lub(e: IValue) = et lub e.getType
   protected def lub(e: ISet) = et lub e.getElementType
 
@@ -46,23 +44,22 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
 
   def contains(x: IValue) = xs contains x
 
-  def insert[SetOrRel <: ISet](x: IValue) = Set(this lub x, xs + x).asInstanceOf[SetOrRel]
+  def insert(x: IValue): ISet = Set(this lub x, xs + x)
+  def delete(x: IValue): ISet = Set(this lub x, xs - x)
 
-  def delete[SetOrRel <: ISet](x: IValue) = Set(this lub x, xs - x).asInstanceOf[SetOrRel]
-
-  def union[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(ot, ys) => Set(et lub ot, xs | ys).asInstanceOf[SetOrRel]
-    case Relation(ot, ys) => Set(et lub ot, xs | ys).asInstanceOf[SetOrRel]
+  def union(other: ISet): ISet = other match {
+    case Set(ot, ys) => Set(et lub ot, xs | ys)
+    case Relation(ot, ys) => Set(et lub ot, xs | ys)
   }
 
-  def intersect[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(ot, ys) => Set(et lub ot, xs & ys).asInstanceOf[SetOrRel]
-    case Relation(ot, ys) => Set(et lub ot, xs & ys).asInstanceOf[SetOrRel]
+  def intersect(other: ISet): ISet = other match {
+    case Set(ot, ys) => Set(et lub ot, xs & ys)
+    case Relation(ot, ys) => Set(et lub ot, xs & ys)
   }
 
-  def subtract[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(_, ys) => Set(et, xs &~ ys).asInstanceOf[SetOrRel]
-    case Relation(_, ys) => Set(et, xs &~ ys).asInstanceOf[SetOrRel]
+  def subtract(other: ISet): ISet = other match {
+    case Set(_, ys) => Set(et, xs &~ ys)
+    case Relation(_, ys) => Set(et, xs &~ ys)
   }
 
   def product(other: ISet): IRelation = {
@@ -79,7 +76,7 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
   def isSubsetOf(other: ISet) = other match {
     case Set(_, ys) => xs subsetOf ys
     case Relation(_, ys) => xs subsetOf ys
-  }  
+  }
 
   def iterator = xs iterator
 
@@ -98,6 +95,6 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
     case _ => false
   }
 
-  override def hashCode = hash
+  override lazy val hashCode = xs.hashCode
 
 }

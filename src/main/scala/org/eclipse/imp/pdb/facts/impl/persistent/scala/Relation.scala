@@ -31,81 +31,42 @@ import collection.JavaConversions.iterableAsScalaIterable
 // TODO: specialize class for ITuple
 // TODO: remove duplicated SetOrRel duplicates [Set replaced by relation in return type]
 case class Relation(et: Type, xs: collection.immutable.Set[IValue])
-  extends Value with IRelation {
+  extends Set(et, xs) with IRelation {
 
-  private lazy val hash: Int = xs.hashCode;
-    
   protected def lub(e: IValue) = et lub e.getType
   protected def lub(e: ISet) = et lub e.getElementType    
   
   override lazy val t = TypeFactory.getInstance relTypeFromTuple et  
+   
   
-  def getElementType = et
-
-  def isEmpty = xs isEmpty
-
-  def size = xs size
-
-  def contains(x: IValue) = xs contains x  
+  /*
+   * ISet [Overrides]
+   */  
+  def insert(x: IValue): IRelation = Relation(this lub x, xs + x)  
   
-  def insert[SetOrRel <: ISet](x: IValue) = Relation(this lub x, xs + x).asInstanceOf[SetOrRel]  
+  def delete(x: IValue): IRelation = Relation(this lub x, xs - x)  
   
-  def delete[SetOrRel <: ISet](x: IValue) = Relation(this lub x, xs - x).asInstanceOf[SetOrRel]  
-  
-  def union[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(ot, ys) => Relation(et lub ot, xs | ys).asInstanceOf[SetOrRel]
-    case Relation(ot, ys) => Relation(et lub ot, xs | ys).asInstanceOf[SetOrRel]
+  def union(other: ISet): IRelation = other match {
+    case Set(ot, ys) => Relation(et lub ot, xs | ys)
+    case Relation(ot, ys) => Relation(et lub ot, xs | ys)
   }
 
-  def intersect[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(ot, ys) => Relation(et lub ot, xs & ys).asInstanceOf[SetOrRel]
-    case Relation(ot, ys) => Relation(et lub ot, xs & ys).asInstanceOf[SetOrRel]
+  def intersect(other: ISet): IRelation = other match {
+    case Set(ot, ys) => Relation(et lub ot, xs & ys)
+    case Relation(ot, ys) => Relation(et lub ot, xs & ys)
   }
 
-  def subtract[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(_, ys) => Relation(et, xs &~ ys).asInstanceOf[SetOrRel]
-    case Relation(_, ys) => Relation(et, xs &~ ys).asInstanceOf[SetOrRel]
+  def subtract(other: ISet): IRelation = other match {
+    case Set(_, ys) => Relation(et, xs &~ ys)
+    case Relation(_, ys) => Relation(et, xs &~ ys)
   }
-  
-  def product(other: ISet): IRelation = {
-    val calculate = (ot: Type, ys: collection.immutable.Set[IValue]) => {
-      val productType = TypeFactory.getInstance tupleType (et, ot)
-      Relation(productType, for (x <- xs; y <- ys) yield new Tuple(x, y))
-    }
-    other match {
-      case Set(ot, ys) => calculate(ot, ys)
-      case Relation(ot, ys) => calculate(ot, ys)
-    }
-  }
-  
-  def isSubsetOf(other: ISet) = other match {
-    case Set(_, ys) => xs subsetOf ys
-    case Relation(_, ys) => xs subsetOf ys
-  }  
-  
-  def iterator = xs iterator
   
   override def accept[T](v: IValueVisitor[T]): T = v visitRelation this
+   
   
-  // TODO: remove duplication
-  override def equals(that: Any): Boolean = that match {
-    case other: Set => {
-      if (this.xs == empty && other.xs == empty) true
-      else (this.et comparable other.t) && (this.xs equals other.xs)
-    }
-    case other: Relation => {
-      if (this.xs == empty && other.xs == empty) true
-      else (this.et comparable other.et) && (this.xs equals other.xs)
-    }    
-    case _ => false
-  }
-  
-  override def hashCode = hash    
-  
-  
-  
-  
-  
+  /*
+   * IRelation [Additions]
+   */  
   def arity = et getArity
 
   def compose(that: IRelation): IRelation = that match {
