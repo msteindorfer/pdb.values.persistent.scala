@@ -41,8 +41,9 @@ class SetWriter(var t: Type) extends ISetWriter {
 class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
     
   override def insert(ys: IValue*) { ys foreach updateType ; super.insert(ys: _*) }       
-      
-  override def insertAll(ys: java.lang.Iterable[_ <: IValue]) { ys foreach updateType ; super.insertAll(ys) }   
+  
+//	// cyclic reference
+//  override def insertAll(ys: java.lang.Iterable[_ <: IValue]) { ys foreach updateType ; super.insertAll(ys) }   
   
   private def updateType(x: IValue) = t = t lub x.getType  
 

@@ -16,21 +16,21 @@ import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
-import org.eclipse.imp.pdb.facts.impl.Value
 
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
 
-case class Node(t: Type, name: String, children: collection.immutable.Vector[IValue], annotations: collection.immutable.Map[String, IValue]) extends Value(t) with INode {
-    
+case class Node(override val t: Type, name: String, children: collection.immutable.Vector[IValue], annotations: collection.immutable.Map[String, IValue])
+  extends Value with INode {
+
   def this(name: String) = this(TypeFactory.getInstance nodeType, name, collection.immutable.Vector.empty, collection.immutable.Map.empty)
 
   def this(name: String, annotations: collection.immutable.Map[String, IValue], children: collection.immutable.Vector[IValue]) = this(TypeFactory.getInstance nodeType, name, children, annotations)
-  
+
   def this(name: String, children: collection.immutable.Vector[IValue]) = this(TypeFactory.getInstance nodeType, name, children, collection.immutable.Map.empty)
-    
+
   def get(i: Int) = children(i)
 
   def set(i: Int, x: IValue) = Node(t, name, children updated (i, x), annotations)
@@ -47,7 +47,7 @@ case class Node(t: Type, name: String, children: collection.immutable.Vector[IVa
 
   def hasAnnotation(label: String) = annotations contains label
 
-  def hasAnnotations = !(annotations isEmpty) 
+  def hasAnnotations = !(annotations isEmpty)
 
   def getAnnotations = annotations
 
@@ -55,29 +55,29 @@ case class Node(t: Type, name: String, children: collection.immutable.Vector[IVa
 
   def joinAnnotations(newAnnotations: java.util.Map[String, IValue]) = Node(t, name, children, annotations ++ newAnnotations)
 
-  def setAnnotation(label: String, newValue: IValue) = Node(t, name, children, annotations + (label -> newValue)) 
-  
-  def removeAnnotation(key: String) = Node(t, name, children, annotations - key) 
+  def setAnnotation(label: String, newValue: IValue) = Node(t, name, children, annotations + (label -> newValue))
+
+  def removeAnnotation(key: String) = Node(t, name, children, annotations - key)
 
   def removeAnnotations = Node(t, name, children, collection.immutable.Map.empty)
 
   def accept[T](v: IValueVisitor[T]): T = v visitNode this
 
-  private lazy val hash = {  
+  private lazy val hash = {
     val hashFormula = (h: Int, x: IValue) => (h << 1) ^ (h >> 1) ^ x.hashCode
     children.foldLeft(name.hashCode)(hashFormula)
-  }  
-  
-  override def hashCode = hash    
+  }
+
+  override def hashCode = hash
 
   override def equals(that: Any): Boolean = that match {
     case other: Node => {
       (this.t comparable other.t) &&
-      (this.children.length == other.children.length) &&
-      (this.name == other.name) &&
-      (0 until children.length).forall(i => this.children(i) equals other.children(i))
+        (this.children.length == other.children.length) &&
+        (this.name == other.name) &&
+        (0 until children.length).forall(i => this.children(i) equals other.children(i))
     }
     case _ => false
   }
-	
+
 }

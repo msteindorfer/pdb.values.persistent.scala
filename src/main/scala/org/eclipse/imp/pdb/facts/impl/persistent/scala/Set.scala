@@ -17,7 +17,6 @@ import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.IRelation
 import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
 import org.eclipse.imp.pdb.facts.exceptions.UnexpectedElementTypeException
-import org.eclipse.imp.pdb.facts.impl.Value
 import org.eclipse.imp.pdb.facts.impl.Writer
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
@@ -29,16 +28,17 @@ import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
 // TODO: check variance and invariance
-// TODO: check why I don't have to specify setType in super call?
-case class Set(t: Type, xs: collection.immutable.Set[IValue])
-  extends Value(TypeFactory.getInstance setType t) with ISet {
-
+case class Set(et: Type, xs: collection.immutable.Set[IValue])
+  extends Value with ISet {
+  
   private lazy val hash: Int = xs.hashCode;
 
-  protected def lub(e: IValue) = t lub e.getType
-  protected def lub(e: ISet) = t lub e.getElementType
+  protected def lub(e: IValue) = et lub e.getType
+  protected def lub(e: ISet) = et lub e.getElementType
 
-  def getElementType = t
+  override lazy val t = TypeFactory.getInstance setType et
+  
+  def getElementType = et
 
   def isEmpty = xs isEmpty
 
@@ -51,23 +51,23 @@ case class Set(t: Type, xs: collection.immutable.Set[IValue])
   def delete[SetOrRel <: ISet](x: IValue) = Set(this lub x, xs - x).asInstanceOf[SetOrRel]
 
   def union[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(ot, ys) => Set(t lub ot, xs | ys).asInstanceOf[SetOrRel]
-    case Relation(ot, ys) => Set(t lub ot, xs | ys).asInstanceOf[SetOrRel]
+    case Set(ot, ys) => Set(et lub ot, xs | ys).asInstanceOf[SetOrRel]
+    case Relation(ot, ys) => Set(et lub ot, xs | ys).asInstanceOf[SetOrRel]
   }
 
   def intersect[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(ot, ys) => Set(t lub ot, xs & ys).asInstanceOf[SetOrRel]
-    case Relation(ot, ys) => Set(t lub ot, xs & ys).asInstanceOf[SetOrRel]
+    case Set(ot, ys) => Set(et lub ot, xs & ys).asInstanceOf[SetOrRel]
+    case Relation(ot, ys) => Set(et lub ot, xs & ys).asInstanceOf[SetOrRel]
   }
 
   def subtract[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(_, ys) => Set(t, xs &~ ys).asInstanceOf[SetOrRel]
-    case Relation(_, ys) => Set(t, xs &~ ys).asInstanceOf[SetOrRel]
+    case Set(_, ys) => Set(et, xs &~ ys).asInstanceOf[SetOrRel]
+    case Relation(_, ys) => Set(et, xs &~ ys).asInstanceOf[SetOrRel]
   }
 
   def product(other: ISet): IRelation = {
     val calculate = (ot: Type, ys: collection.immutable.Set[IValue]) => {
-      val productType = TypeFactory.getInstance tupleType (t, ot)
+      val productType = TypeFactory.getInstance tupleType (et, ot)
       Relation(productType, for (x <- xs; y <- ys) yield new Tuple(x, y))
     }
     other match {
@@ -89,11 +89,11 @@ case class Set(t: Type, xs: collection.immutable.Set[IValue])
   override def equals(that: Any): Boolean = that match {
     case other: Set => {
       if (this.xs == empty && other.xs == empty) true
-      else (this.t comparable other.t) && (this.xs equals other.xs)
+      else (this.et comparable other.et) && (this.xs equals other.xs)
     }
     case other: Relation => {
       if (this.xs == empty && other.xs == empty) true
-      else (this.t comparable other.t) && (this.xs equals other.xs)
+      else (this.et comparable other.t) && (this.xs equals other.xs)
     }    
     case _ => false
   }

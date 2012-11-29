@@ -52,8 +52,9 @@ class MapWriterWithTypeInference() extends MapWriter(TypeFactory.getInstance voi
   override def putAll(ys: java.util.Map[IValue, IValue]) = { ys foreach { case (k, v) => updateTypes(k, v) } ; super.putAll(ys) }
   
   override def insert(ys: IValue*) { ys foreach updateType ; super.insert(ys: _*) }       
-      
-  override def insertAll(ys: java.lang.Iterable[_ <: IValue]) { ys foreach updateType ; super.insertAll(ys) }   
+
+//  // cyclic reference
+//  override def insertAll(ys: java.lang.Iterable[_ <: IValue]) { ys foreach updateType ; super.insertAll(ys) }   
 
   private def updateType(kv: IValue) = kv match {
     case Tuple(Vector(k, v)) => updateTypes(k, v)

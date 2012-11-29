@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
-import org.eclipse.imp.pdb.facts.impl.Value
 import org.eclipse.imp.pdb.facts.IMap
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.`type`.Type
@@ -27,10 +26,12 @@ import collection.JavaConversions.mapAsJavaMap
 // TODO: type inference, if type not given
 // TODO: containsValue performs check with "equals" whereas common and isSubMap perform check with "isEqual". The same behavior is present in the reference implementation.
 case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IValue])
-  extends Value(TypeFactory.getInstance mapType (kt, vt)) with IMap {
+  extends Value with IMap {
 
   private lazy val hash: Int = xs.hashCode;
 
+  override lazy val t = TypeFactory.getInstance mapType (kt, vt)
+  
   def isEmpty = xs isEmpty
 
   def size = xs size
@@ -69,14 +70,9 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
   }
 
   def isSubMap(other: IMap) = other match {
-    case Map(_, _, ys) => xs forall {
-      case (k, v) => ys get k match {
-        case None => false
-        case Some(w) => v isEqual w
-      }
-    }
+    case Map(_, _, ys) => xs.keys forall (ys.contains _)
   }
-
+  
   def iterator = xs.keys iterator
 
   def valueIterator = xs.values iterator

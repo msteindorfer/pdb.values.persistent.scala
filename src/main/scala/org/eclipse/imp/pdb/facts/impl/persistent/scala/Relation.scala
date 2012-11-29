@@ -18,7 +18,6 @@ import org.eclipse.imp.pdb.facts.IRelation
 import org.eclipse.imp.pdb.facts.ITuple
 import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
 import org.eclipse.imp.pdb.facts.exceptions.UnexpectedElementTypeException
-import org.eclipse.imp.pdb.facts.impl.Value
 import org.eclipse.imp.pdb.facts.impl.Writer
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
@@ -31,15 +30,17 @@ import collection.JavaConversions.iterableAsScalaIterable
 
 // TODO: specialize class for ITuple
 // TODO: remove duplicated SetOrRel duplicates [Set replaced by relation in return type]
-case class Relation(t: Type, xs: collection.immutable.Set[IValue])
-  extends Value(TypeFactory.getInstance relTypeFromTuple t) with IRelation {
+case class Relation(et: Type, xs: collection.immutable.Set[IValue])
+  extends Value with IRelation {
 
   private lazy val hash: Int = xs.hashCode;
     
-  protected def lub(e: IValue) = t lub e.getType
-  protected def lub(e: ISet) = t lub e.getElementType    
+  protected def lub(e: IValue) = et lub e.getType
+  protected def lub(e: ISet) = et lub e.getElementType    
   
-  def getElementType = t
+  override lazy val t = TypeFactory.getInstance relTypeFromTuple et  
+  
+  def getElementType = et
 
   def isEmpty = xs isEmpty
 
@@ -52,23 +53,23 @@ case class Relation(t: Type, xs: collection.immutable.Set[IValue])
   def delete[SetOrRel <: ISet](x: IValue) = Relation(this lub x, xs - x).asInstanceOf[SetOrRel]  
   
   def union[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(ot, ys) => Relation(t lub ot, xs | ys).asInstanceOf[SetOrRel]
-    case Relation(ot, ys) => Relation(t lub ot, xs | ys).asInstanceOf[SetOrRel]
+    case Set(ot, ys) => Relation(et lub ot, xs | ys).asInstanceOf[SetOrRel]
+    case Relation(ot, ys) => Relation(et lub ot, xs | ys).asInstanceOf[SetOrRel]
   }
 
   def intersect[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(ot, ys) => Relation(t lub ot, xs & ys).asInstanceOf[SetOrRel]
-    case Relation(ot, ys) => Relation(t lub ot, xs & ys).asInstanceOf[SetOrRel]
+    case Set(ot, ys) => Relation(et lub ot, xs & ys).asInstanceOf[SetOrRel]
+    case Relation(ot, ys) => Relation(et lub ot, xs & ys).asInstanceOf[SetOrRel]
   }
 
   def subtract[SetOrRel <: ISet](other: ISet) = other match {
-    case Set(_, ys) => Relation(t, xs &~ ys).asInstanceOf[SetOrRel]
-    case Relation(_, ys) => Relation(t, xs &~ ys).asInstanceOf[SetOrRel]
+    case Set(_, ys) => Relation(et, xs &~ ys).asInstanceOf[SetOrRel]
+    case Relation(_, ys) => Relation(et, xs &~ ys).asInstanceOf[SetOrRel]
   }
   
   def product(other: ISet): IRelation = {
     val calculate = (ot: Type, ys: collection.immutable.Set[IValue]) => {
-      val productType = TypeFactory.getInstance tupleType (t, ot)
+      val productType = TypeFactory.getInstance tupleType (et, ot)
       Relation(productType, for (x <- xs; y <- ys) yield new Tuple(x, y))
     }
     other match {
@@ -90,11 +91,11 @@ case class Relation(t: Type, xs: collection.immutable.Set[IValue])
   override def equals(that: Any): Boolean = that match {
     case other: Set => {
       if (this.xs == empty && other.xs == empty) true
-      else (this.t comparable other.t) && (this.xs equals other.xs)
+      else (this.et comparable other.t) && (this.xs equals other.xs)
     }
     case other: Relation => {
       if (this.xs == empty && other.xs == empty) true
-      else (this.t comparable other.t) && (this.xs equals other.xs)
+      else (this.et comparable other.et) && (this.xs equals other.xs)
     }    
     case _ => false
   }
@@ -105,7 +106,7 @@ case class Relation(t: Type, xs: collection.immutable.Set[IValue])
   
   
   
-  def arity = t getArity
+  def arity = et getArity
 
   def compose(that: IRelation): IRelation = that match {
     case other: Relation => {
@@ -151,7 +152,7 @@ case class Relation(t: Type, xs: collection.immutable.Set[IValue])
     newElementSet
   }
 
-  def getFieldTypes = fType getFieldTypes
+  def getFieldTypes = t getFieldTypes
 
   def domain: ISet = valuesAtIndex(0)
   
