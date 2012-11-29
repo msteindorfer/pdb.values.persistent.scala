@@ -27,7 +27,6 @@ import collection.immutable.Set.empty
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
-// TODO: check variance and invariance
 case class Set(et: Type, xs: collection.immutable.Set[IValue])
   extends Value with ISet {
   

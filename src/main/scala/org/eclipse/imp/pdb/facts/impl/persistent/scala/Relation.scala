@@ -28,7 +28,6 @@ import collection.immutable.Set.empty
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
-// TODO: specialize class for ITuple
 // TODO: remove duplicated SetOrRel duplicates [Set replaced by relation in return type]
 case class Relation(et: Type, xs: collection.immutable.Set[IValue])
   extends Set(et, xs) with IRelation {
@@ -115,9 +114,9 @@ case class Relation(et: Type, xs: collection.immutable.Set[IValue])
 
   def getFieldTypes = t getFieldTypes
 
-  def domain: ISet = valuesAtIndex(0)
+  def domain = valuesAtIndex(0)
   
-  def range: ISet = valuesAtIndex(getType.getArity - 1)
+  def range = valuesAtIndex(getType.getArity - 1)
 
   def valuesAtIndex(i: Int): ISet = Set(getType.getFieldType(i), for (Tuple(vs) <- xs) yield vs(i))  
   
