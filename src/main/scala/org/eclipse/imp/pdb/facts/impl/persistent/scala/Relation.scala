@@ -29,39 +29,21 @@ import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
 // TODO: remove duplicated SetOrRel duplicates [Set replaced by relation in return type]
-case class Relation(et: Type, xs: collection.immutable.Set[IValue])
+case class Relation(override val et: Type, override val xs: collection.immutable.Set[IValue])
   extends Set(et, xs) with IRelation {
-
-  protected def lub(e: IValue) = et lub e.getType
-  protected def lub(e: ISet) = et lub e.getElementType    
-  
+ 
   override lazy val t = TypeFactory.getInstance relTypeFromTuple et  
-   
+  
+  override def accept[T](v: IValueVisitor[T]): T = v visitRelation this
+  
   
   /*
    * ISet [Overrides]
    */  
-  def insert(x: IValue): IRelation = Relation(this lub x, xs + x)  
+  override def insert[SetOrRel <: ISet](x: IValue) = Relation(this lub x, xs + x).asInstanceOf[SetOrRel]
   
-  def delete(x: IValue): IRelation = Relation(this lub x, xs - x)  
+  override def delete[SetOrRel <: ISet](x: IValue) = Relation(this lub x, xs - x).asInstanceOf[SetOrRel]
   
-  def union(other: ISet): IRelation = other match {
-    case Set(ot, ys) => Relation(et lub ot, xs | ys)
-    case Relation(ot, ys) => Relation(et lub ot, xs | ys)
-  }
-
-  def intersect(other: ISet): IRelation = other match {
-    case Set(ot, ys) => Relation(et lub ot, xs & ys)
-    case Relation(ot, ys) => Relation(et lub ot, xs & ys)
-  }
-
-  def subtract(other: ISet): IRelation = other match {
-    case Set(_, ys) => Relation(et, xs &~ ys)
-    case Relation(_, ys) => Relation(et, xs &~ ys)
-  }
-  
-  override def accept[T](v: IValueVisitor[T]): T = v visitRelation this
-   
   
   /*
    * IRelation [Additions]
@@ -87,7 +69,7 @@ case class Relation(et: Type, xs: collection.immutable.Set[IValue])
   def closure: IRelation = {
 	getType closure // will throw exception if not binary and reflexive
 
-    var tmp = this;
+    var tmp: IRelation = this;
     var prevCount = 0;
 
     while (prevCount != tmp.size) {

@@ -43,54 +43,60 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
 
   def contains(x: IValue) = xs contains x
 
-  def insert(x: IValue): ISet = Set(this lub x, xs + x)
-  def delete(x: IValue): ISet = Set(this lub x, xs - x)
+  def insert[SetOrRel <: ISet](x: IValue) = Set(this lub x, xs + x).asInstanceOf[SetOrRel]
 
-  def union(other: ISet): ISet = other match {
-    case Set(ot, ys) => Set(et lub ot, xs | ys)
-    case Relation(ot, ys) => Set(et lub ot, xs | ys)
+  def delete[SetOrRel <: ISet](x: IValue) = Set(this lub x, xs - x).asInstanceOf[SetOrRel]
+  
+  // TODO: higher order function with operation as parameter
+  def union[SetOrRel <: ISet](other: ISet) = other match {
+    case Set(ot, ys) => {
+      val rt = et lub ot
+      val rv = xs | ys
+
+      if (rt isTupleType) Relation(rt, rv) else Set(rt, rv)
+    }.asInstanceOf[SetOrRel]
   }
 
-  def intersect(other: ISet): ISet = other match {
-    case Set(ot, ys) => Set(et lub ot, xs & ys)
-    case Relation(ot, ys) => Set(et lub ot, xs & ys)
+  // TODO: higher order function with operation as parameter
+  def intersect[SetOrRel <: ISet](other: ISet) = other match {
+    case Set(ot, ys) => {
+      val rt = et lub ot
+      val rv = xs & ys
+
+      if (rt isTupleType) Relation(rt, rv) else Set(rt, rv)
+    }.asInstanceOf[SetOrRel]
+  }
+  
+  // TODO: higher order function with operation as parameter  
+  def subtract[SetOrRel <: ISet](other: ISet) = other match {
+    case Set(ot, ys) => {
+      val rt = et // type is different from union and intersect
+      val rv = xs &~ ys
+
+      if (rt isTupleType) Relation(rt, rv) else Set(rt, rv)
+    }.asInstanceOf[SetOrRel]
   }
 
-  def subtract(other: ISet): ISet = other match {
-    case Set(_, ys) => Set(et, xs &~ ys)
-    case Relation(_, ys) => Set(et, xs &~ ys)
-  }
-
-  def product(other: ISet): IRelation = {
-    val calculate = (ot: Type, ys: collection.immutable.Set[IValue]) => {
+  def product(other: ISet): IRelation = other match {
+    case Set(ot, ys) => {
       val productType = TypeFactory.getInstance tupleType (et, ot)
       Relation(productType, for (x <- xs; y <- ys) yield new Tuple(x, y))
-    }
-    other match {
-      case Set(ot, ys) => calculate(ot, ys)
-      case Relation(ot, ys) => calculate(ot, ys)
     }
   }
 
   def isSubsetOf(other: ISet) = other match {
     case Set(_, ys) => xs subsetOf ys
-    case Relation(_, ys) => xs subsetOf ys
   }
 
   def iterator = xs iterator
 
   def accept[T](v: IValueVisitor[T]): T = v visitSet this
 
-  // TODO: remove duplication
   override def equals(that: Any): Boolean = that match {
     case other: Set => {
       if (this.xs == empty && other.xs == empty) true
       else (this.et comparable other.et) && (this.xs equals other.xs)
     }
-    case other: Relation => {
-      if (this.xs == empty && other.xs == empty) true
-      else (this.et comparable other.t) && (this.xs equals other.xs)
-    }    
     case _ => false
   }
 
