@@ -74,10 +74,7 @@ case class List(et: Type, xs: collection.immutable.List[IValue])
   def accept[T](v: IValueVisitor[T]): T = v visitList this
 
   override def equals(that: Any): Boolean = that match {
-    case other: List => {
-      if (this.xs == Nil && other.xs == Nil) true
-      else (this.t comparable other.t) && (this.xs equals other.xs)
-    }
+    case other: List => (this.xs equals other.xs)
     case _ => false
   }
 

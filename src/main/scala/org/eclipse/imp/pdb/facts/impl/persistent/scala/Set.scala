@@ -93,10 +93,7 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
   def accept[T](v: IValueVisitor[T]): T = v visitSet this
 
   override def equals(that: Any): Boolean = that match {
-    case other: Set => {
-      if (this.xs == empty && other.xs == empty) true
-      else (this.et comparable other.et) && (this.xs equals other.xs)
-    }
+    case other: Set => (this.xs equals other.xs)
     case _ => false
   }
 
