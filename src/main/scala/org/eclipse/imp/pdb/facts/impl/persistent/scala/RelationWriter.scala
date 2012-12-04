@@ -22,28 +22,10 @@ import collection.immutable.Set.empty
 import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
 
-class RelationWriter(var t: Type) extends IRelationWriter {
-  
-  var xs = collection.immutable.Set[IValue]().empty
-  
-  def size = xs size
-  
-  def done = Relation(t, xs)
+class RelationWriter(t: Type) extends SetWriter(t) with IRelationWriter {
 
-  def insert(ys: IValue*) { xs = xs ++ ys }       
-      
-  def insertAll(ys: java.lang.Iterable[_ <: IValue]) { xs = xs ++ ys} 
-  
-  def delete(x: IValue) {xs = xs - x}
+  override def done = Relation(t, xs)
+
 }
 
-class RelationWriterWithTypeInference() extends RelationWriter(TypeFactory.getInstance relType (TypeFactory.getInstance voidType)) with IRelationWriter {
-
-  override def insert(ys: IValue*) { ys foreach updateType ; super.insert(ys: _*) }       
-      
-  override def insertAll(ys: java.lang.Iterable[_ <: IValue]) { ys foreach updateType ; super.insertAll(ys) }   
-  
-  private def updateType(x: IValue) = t = t lub x.getType    
-  
-}
-  
+class RelationWriterWithTypeInference() extends RelationWriter(TypeFactory.getInstance relType (TypeFactory.getInstance voidType)) with IRelationWriter {}

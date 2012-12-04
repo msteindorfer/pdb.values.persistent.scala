@@ -21,13 +21,13 @@ import collection.immutable.Set.empty
 import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
 
-// TODO: fix var t in constructor
-class SetWriter(var t: Type) extends ISetWriter {
+class SetWriter(t: Type) extends ISetWriter {
   
   var xs = collection.immutable.Set[IValue]().empty
   
   def size = xs size
   
+  // TODO: Should we also check for a relation type here?
   def done: ISet = Set(t, xs)
 
   def insert(ys: IValue*) { xs = xs ++ ys }       
@@ -40,13 +40,15 @@ class SetWriter(var t: Type) extends ISetWriter {
 
 class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
     
-  override def insert(ys: IValue*) { ys foreach updateType ; super.insert(ys: _*) }       
-  
-//	// cyclic reference
-//  override def insertAll(ys: java.lang.Iterable[_ <: IValue]) { ys foreach updateType ; super.insertAll(ys) }   
-  
-  private def updateType(x: IValue) = t = t lub x.getType  
-
-  override def done = if (t isTupleType) Relation(t, xs) else Set(t, xs)
+  // TODO: move to a common place
+  // NOTE: nice example of how to shorten code
+  def lub(xs: Traversable[IValue]): Type = {
+    xs.foldLeft(TypeFactory.getInstance voidType)((t, x) => t lub x.getType)
+  }  
+   
+  override def done = {
+    val zs = empty ++ xs ; val lub = this lub zs 
+    if (lub isTupleType) Relation(lub, zs) else Set(lub, zs)
+  }
   
 }

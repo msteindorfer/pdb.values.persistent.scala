@@ -44,22 +44,16 @@ case class MapWriter(var kt: Type, var vt: Type) extends IMapWriter {
 }
 
 class MapWriterWithTypeInference() extends MapWriter(TypeFactory.getInstance voidType, TypeFactory.getInstance voidType) {
-    
-  override def put(k: IValue, v: IValue) = { updateTypes(k, v) ; super.put(k, v) }
-  
-  override def putAll(ys: IMap) = { ys foreach updateType ; super.putAll(ys) }
-  
-  override def putAll(ys: java.util.Map[IValue, IValue]) = { ys foreach { case (k, v) => updateTypes(k, v) } ; super.putAll(ys) }
-  
-  override def insert(ys: IValue*) { ys foreach updateType ; super.insert(ys: _*) }       
 
-//  // cyclic reference
-//  override def insertAll(ys: java.lang.Iterable[_ <: IValue]) { ys foreach updateType ; super.insertAll(ys) }   
+  // TODO: move to a common place
+  // NOTE: nice example of how to shorten code
+  def lub(xs: Traversable[IValue]): Type = {
+    xs.foldLeft(TypeFactory.getInstance voidType)((t, x) => t lub x.getType)
+  }
 
-  private def updateType(kv: IValue) = kv match {
-    case Tuple(Vector(k, v)) => updateTypes(k, v)
+  override def done = {
+    val zs = empty ++ xs; val lubKeys = this lub zs.keys; val lubValues = this lub zs.values
+    Map(lubKeys, lubValues, zs)
   }
   
-  private def updateTypes(k: IValue, v: IValue) = { kt = kt lub k.getType ;  vt = vt lub v.getType }
-
 }
