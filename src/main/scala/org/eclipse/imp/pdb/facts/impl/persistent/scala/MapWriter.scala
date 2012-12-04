@@ -22,8 +22,7 @@ import collection.immutable.Map.empty
 import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
 
-// TODO: fix var kt, vt in constructor
-case class MapWriter(var kt: Type, var vt: Type) extends IMapWriter {
+case class MapWriter(kt: Type, vt: Type) extends IMapWriter {
 
   val xs = collection.mutable.Map[IValue, IValue]()
   

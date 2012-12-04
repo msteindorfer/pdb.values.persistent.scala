@@ -43,8 +43,10 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
 
   def contains(x: IValue) = xs contains x
 
+  // TODO: unify with Relation
   def insert[SetOrRel <: ISet](x: IValue) = Set(this lub x, xs + x).asInstanceOf[SetOrRel]
 
+  // TODO: unify with Relation
   def delete[SetOrRel <: ISet](x: IValue) = Set(this lub x, xs - x).asInstanceOf[SetOrRel]
   
   // TODO: higher order function with operation as parameter
