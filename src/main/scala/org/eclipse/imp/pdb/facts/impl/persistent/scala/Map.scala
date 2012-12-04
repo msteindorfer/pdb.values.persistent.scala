@@ -23,13 +23,9 @@ import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.asScalaIterator
 import collection.JavaConversions.mapAsJavaMap
 
-// TODO: type inference, if type not given
-// TODO: containsValue performs check with "equals" whereas common and isSubMap perform check with "isEqual". The same behavior is present in the reference implementation.
 case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IValue])
   extends Value with IMap {
-
-  private lazy val hash: Int = xs.hashCode;
-
+  
   override lazy val t = TypeFactory.getInstance mapType (kt, vt)
   
   def isEmpty = xs isEmpty
@@ -87,6 +83,6 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
     case _ => false
   }
 
-  override def hashCode = hash
+  override lazy val hashCode = xs.hashCode
 
 }
