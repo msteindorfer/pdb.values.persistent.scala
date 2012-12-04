@@ -25,11 +25,8 @@ import org.eclipse.imp.pdb.facts.visitors.VisitorException
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
-// TODO: type inference, if type not given
 case class List(et: Type, xs: collection.immutable.List[IValue])
   extends Value with IList {
-
-  private lazy val hash: Int = xs.hashCode;
 
   private def lub(e: IValue) = et lub e.getType
   private def lub(e: IList) = et lub e.getElementType
@@ -78,6 +75,6 @@ case class List(et: Type, xs: collection.immutable.List[IValue])
     case _ => false
   }
 
-  override def hashCode = hash
+  override lazy val hashCode = xs.hashCode
 
 }
