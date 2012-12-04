@@ -22,7 +22,7 @@ import collection.JavaConversions.iterableAsScalaIterable
 import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
 
-case class Node(override val t: Type, name: String, children: collection.immutable.Vector[IValue], annotations: collection.immutable.Map[String, IValue])
+case class Node(val t: Type, name: String, children: collection.immutable.Vector[IValue], annotations: collection.immutable.Map[String, IValue])
   extends Value with INode {
 
   def this(name: String) = this(TypeFactory.getInstance nodeType, name, collection.immutable.Vector.empty, collection.immutable.Map.empty)
@@ -63,12 +63,10 @@ case class Node(override val t: Type, name: String, children: collection.immutab
 
   def accept[T](v: IValueVisitor[T]): T = v visitNode this
 
-  private lazy val hash = {
+  override lazy val hashCode = {
     val hashFormula = (h: Int, x: IValue) => (h << 1) ^ (h >> 1) ^ x.hashCode
     children.foldLeft(name.hashCode)(hashFormula)
   }
-
-  override def hashCode = hash
 
   override def equals(that: Any): Boolean = that match {
     case other: Node => {
