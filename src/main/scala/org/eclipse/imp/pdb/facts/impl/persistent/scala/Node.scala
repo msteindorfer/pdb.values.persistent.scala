@@ -22,7 +22,7 @@ import collection.JavaConversions.iterableAsScalaIterable
 import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
 
-case class Node(val t: Type, name: String, children: collection.immutable.Vector[IValue], annotations: collection.immutable.Map[String, IValue])
+case class Node(override val t: Type, name: String, children: collection.immutable.Vector[IValue], annotations: collection.immutable.Map[String, IValue])
   extends Value with INode {
 
   def this(name: String) = this(TypeFactory.getInstance nodeType, name, collection.immutable.Vector.empty, collection.immutable.Map.empty)
