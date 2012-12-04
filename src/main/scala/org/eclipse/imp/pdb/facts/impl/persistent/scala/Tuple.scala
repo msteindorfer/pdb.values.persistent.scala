@@ -62,11 +62,9 @@ case class Tuple(xs: Vector[IValue]) extends Value with ITuple {
     case _ => false
   }
 
-  private lazy val hash = {  
+  override lazy val hashCode = {  
     val hashFormula = (h: Int, x: IValue) => (h << 1) ^ (h >> 1) ^ x.hashCode
     xs.foldLeft(0)(hashFormula)
-  }  
+  }
   
-  override def hashCode = hash  
- 
 }
