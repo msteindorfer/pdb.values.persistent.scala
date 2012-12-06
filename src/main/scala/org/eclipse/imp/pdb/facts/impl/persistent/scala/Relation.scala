@@ -12,13 +12,11 @@
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.ISet
-import org.eclipse.imp.pdb.facts.ISetWriter
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.IRelation
 import org.eclipse.imp.pdb.facts.ITuple
 import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
 import org.eclipse.imp.pdb.facts.exceptions.UnexpectedElementTypeException
-import org.eclipse.imp.pdb.facts.impl.Writer
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
@@ -28,7 +26,6 @@ import collection.immutable.Set.empty
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
-// TODO: remove duplicated SetOrRel duplicates [Set replaced by relation in return type]
 case class Relation(override val et: Type, override val xs: collection.immutable.Set[IValue])
   extends Set(et, xs) with IRelation {
  
@@ -48,36 +45,31 @@ case class Relation(override val et: Type, override val xs: collection.immutable
   /*
    * IRelation [Additions]
    */  
-  def arity = et getArity
-
+  def arity = et getArity 
+  
   def compose(that: IRelation): IRelation = that match {
     case other: Relation => {
-		val resultType = getType compose other.getType
-		// an exception will have been thrown if the relations are not both binary and
-		// have a comparable field to compose.
-		
-		val tuples: collection.immutable.Set[IValue] = for {
-		 Tuple(v1) <- this xs;
-		 Tuple(v2) <- other xs; 
-		 if (v1(1) equals v2(0))
-		} yield new Tuple(v1(0), v2(1))
+      val resultType = getType compose other.getType
+      val otherIndexed = other.xs groupBy { case Tuple(xy) => xy(0) }
 
-		Relation(resultType getFieldTypes, tuples) 
+      val tuples: collection.immutable.Set[IValue] = for {
+        xy <- this.xs.asInstanceOf[collection.immutable.Set[Tuple]];
+        yz <- otherIndexed.getOrElse(xy.get(1), empty).asInstanceOf[collection.immutable.Set[Tuple]]
+      } yield new Tuple(xy.get(0), yz.get(1))
+
+      Relation(resultType getFieldTypes, tuples)
     }
   }
 
   def closure: IRelation = {
-	getType closure // will throw exception if not binary and reflexive
+    getType closure // will throw exception if not binary and reflexive
 
-    var tmp: IRelation = this;
-    var prevCount = 0;
-
-    while (prevCount != tmp.size) {
-      prevCount = tmp.size;
-      tmp = tmp union (tmp compose tmp);
+    def calculate(oldSize: Int, r: Relation): Relation = {
+      if (r.size > oldSize) calculate(r.size, r union (r compose r))
+      else r
     }
 
-    return tmp;
+    calculate(0, this)
   }
 
   def closureStar: IRelation = {

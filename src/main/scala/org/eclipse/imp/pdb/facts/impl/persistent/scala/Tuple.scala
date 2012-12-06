@@ -20,12 +20,10 @@ import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import collection.immutable.Vector.empty
 import collection.JavaConversions.asJavaIterator
 
-// TODO: efficient Tuple from Tuple generation?
 // TODO: fix odd invocation of tupleType and bug inside
 case class Tuple(xs: Vector[IValue]) extends Value with ITuple {
 
   def this() = this(empty)
-  def this(xs: Array[IValue]) = this(empty ++ xs)
   def this(x: IValue, y: IValue) = this(Vector(x, y))
   
   override lazy val t = TypeFactory.getInstance tupleType (xs: _*)
@@ -54,17 +52,10 @@ case class Tuple(xs: Vector[IValue]) extends Value with ITuple {
   def accept[T](v: IValueVisitor[T]): T = v visitTuple this
  
   override def equals(that: Any): Boolean = that match {
-    case other: Tuple => {
-      (this.t comparable other.t) &&
-      (this.arity == other.arity) &&
-      (0 until arity).forall(i => this.xs(i) equals other.xs(i))
-    }
+    case other: Tuple => (this.xs equals other.xs)
     case _ => false
   }
-
-  override lazy val hashCode = {  
-    val hashFormula = (h: Int, x: IValue) => (h << 1) ^ (h >> 1) ^ x.hashCode
-    xs.foldLeft(0)(hashFormula)
-  }
-  
+ 
+  override lazy val hashCode = xs.hashCode
+    
 }
