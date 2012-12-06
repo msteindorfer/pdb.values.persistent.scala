@@ -12,10 +12,8 @@
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.impl.BaseValueFactory
-import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.IString
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.ITuple
 import org.eclipse.imp.pdb.facts.IConstructor
 import org.eclipse.imp.pdb.facts.ISetWriter
@@ -26,6 +24,8 @@ import org.eclipse.imp.pdb.facts.IMap
 import org.eclipse.imp.pdb.facts.IMapWriter
 import org.eclipse.imp.pdb.facts.INode
 import org.eclipse.imp.pdb.facts.IValueFactory;
+import org.eclipse.imp.pdb.facts.`type`.Type
+import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable

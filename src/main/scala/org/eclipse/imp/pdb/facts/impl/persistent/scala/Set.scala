@@ -17,7 +17,6 @@ import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.IRelation
 import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
 import org.eclipse.imp.pdb.facts.exceptions.UnexpectedElementTypeException
-import org.eclipse.imp.pdb.facts.impl.Writer
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
