@@ -93,11 +93,11 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
 
   def accept[T](v: IValueVisitor[T]): T = v visitSet this
 
-  override def equals(that: Any): Boolean = that match {
-    case other: Set => (this.xs equals other.xs)
+  override def equals(other: Any): Boolean = other match {
+    case that: Set => (this.xs equals that.xs)
     case _ => false
   }
 
   override lazy val hashCode = xs.hashCode
-
+  
 }

@@ -47,10 +47,10 @@ case class Relation(override val et: Type, override val xs: collection.immutable
    */  
   def arity = et getArity 
   
-  def compose(that: IRelation): IRelation = that match {
-    case other: Relation => {
-      val resultType = getType compose other.getType
-      val otherIndexed = other.xs groupBy { case Tuple(xy) => xy(0) }
+  def compose(other: IRelation): IRelation = other match {
+    case that: Relation => {
+      val resultType = getType compose that.getType
+      val otherIndexed = that.xs groupBy { _.asInstanceOf[Tuple].get(0) }
 
       val tuples: collection.immutable.Set[IValue] = for {
         xy <- this.xs.asInstanceOf[collection.immutable.Set[Tuple]];
