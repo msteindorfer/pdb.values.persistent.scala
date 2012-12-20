@@ -25,7 +25,7 @@ import collection.immutable.List.empty
 import collection.mutable.ListBuffer
 import collection.JavaConversions.iterableAsScalaIterable
 
-class ListWriter(t: Type) extends IListWriter {
+case class ListWriter(t: Type) extends IListWriter {
 
   val xs = ListBuffer[IValue]()
 
@@ -51,11 +51,11 @@ class ListWriter(t: Type) extends IListWriter {
 
   def delete(i: Int) = xs remove i
 
-  def done = List(t, empty ++ xs)
+  def done = if (xs isEmpty) List(TypeFactory.getInstance voidType, empty ++ xs) else List(t, empty ++ xs)
 
 }
 
-class ListWriterWithTypeInference() extends ListWriter(TypeFactory.getInstance voidType) {
+case class ListWriterWithTypeInference() extends ListWriter(TypeFactory.getInstance voidType) {
 
   // TODO: move to a common place
   // NOTE: nice example of how to shorten code

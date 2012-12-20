@@ -33,7 +33,7 @@ import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
 
 class ValueFactory extends BaseValueFactory {
-
+  
   // NOTE: nice example of how to shorten code
   private def lub(xs: Seq[IValue]): Type = {
     xs.foldLeft(TypeFactory.getInstance voidType)((t, x) => t lub x.getType)
@@ -61,7 +61,7 @@ class ValueFactory extends BaseValueFactory {
 
   def constructor(t: Type, annotations: java.util.Map[String, IValue], children: IValue*): IConstructor = new Constructor(t, collection.immutable.Vector.empty ++ children, collection.immutable.Map.empty ++ annotations)
 
-  def set(t: Type) = if (t isTupleType) Relation(t, collection.immutable.Set.empty) else Set(t, collection.immutable.Set.empty)
+  def set(t: Type) = setWriter(t).done
 
   def set(ys: IValue*) = {
     val t = this lub ys
@@ -69,30 +69,30 @@ class ValueFactory extends BaseValueFactory {
     if (t isTupleType) new Relation(t, xs) else new Set(t, xs)
   }
 
-  def setWriter = new SetWriterWithTypeInference()
+  def setWriter = SetWriterWithTypeInference()
 
   def setWriter(t: Type) = if (t isTupleType) new RelationWriter(t) else new SetWriter(t)
 
-  def list(t: Type) = List(t, Nil)
+  def list(t: Type) = listWriter(t).done 
 
   def list(xs: IValue*) = List(this lub xs, Nil ++ xs)
 
-  def listWriter = new ListWriterWithTypeInference()
+  def listWriter = ListWriterWithTypeInference()
 
-  def listWriter(t: Type) = new ListWriter(t)
+  def listWriter(t: Type) = ListWriter(t)
 
-  def relation(t: Type) = Relation(t, collection.immutable.Set.empty)
+  def relation(t: Type) = relationWriter(t).done
 
   def relation(xs: IValue*) = Relation(this lub xs, collection.immutable.Set.empty ++ xs)
 
-  def relationWriter(t: Type) = new RelationWriter(t)
+  def relationWriter(t: Type) = RelationWriter(t)
 
-  def relationWriter = new RelationWriterWithTypeInference()
+  def relationWriter = RelationWriterWithTypeInference()
 
-  def map(kt: Type, vt: Type) = Map(kt, vt, collection.immutable.Map.empty)
+  def map(kt: Type, vt: Type) = mapWriter(kt, vt).done
 
-  def mapWriter = new MapWriterWithTypeInference()
+  def mapWriter = MapWriterWithTypeInference()
 
-  def mapWriter(kt: Type, vt: Type) = new MapWriter(kt, vt)
+  def mapWriter(kt: Type, vt: Type) = MapWriter(kt, vt)
 
 }

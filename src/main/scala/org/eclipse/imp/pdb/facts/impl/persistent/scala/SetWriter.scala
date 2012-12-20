@@ -21,15 +21,17 @@ import collection.immutable.Set.empty
 import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
 
-class SetWriter(t: Type) extends ISetWriter {
-  
-  var xs = collection.immutable.Set[IValue]().empty
-  
+case class SetWriter(et: Type, var xs: collection.immutable.Set[IValue]) extends ISetWriter {
+
+  def this(t: Type) = this(t, empty) 
+
   def size = xs size
   
-  // TODO: Should we also check for a relation type here?
-  def done: ISet = Set(t, xs)
-
+  def done = {
+    val elementType = if (xs isEmpty) TypeFactory.getInstance voidType else et
+    if (elementType isTupleType) Relation(elementType, xs) else Set(elementType, xs)
+  }
+  
   def insert(ys: IValue*) { xs = xs ++ ys }       
       
   def insertAll(ys: java.lang.Iterable[_ <: IValue]) { xs = xs ++ ys} 
@@ -38,7 +40,7 @@ class SetWriter(t: Type) extends ISetWriter {
 
 }
 
-class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
+case class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
     
   // TODO: move to a common place
   // NOTE: nice example of how to shorten code

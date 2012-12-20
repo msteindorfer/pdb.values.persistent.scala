@@ -54,7 +54,7 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
       val rt = et lub ot
       val rv = xs | ys
 
-      if (rt isTupleType) Relation(rt, rv) else Set(rt, rv)
+      SetWriter(rt, rv).done
     }.asInstanceOf[SetOrRel]
   }
 
@@ -64,7 +64,7 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
       val rt = et lub ot
       val rv = xs & ys
 
-      if (rt isTupleType) Relation(rt, rv) else Set(rt, rv)
+      SetWriter(rt, rv).done
     }.asInstanceOf[SetOrRel]
   }
   
@@ -74,7 +74,7 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
       val rt = et // type is different from union and intersect
       val rv = xs &~ ys
 
-      if (rt isTupleType) Relation(rt, rv) else Set(rt, rv)
+      SetWriter(rt, rv).done
     }.asInstanceOf[SetOrRel]
   }
 

@@ -22,8 +22,8 @@ import collection.immutable.Map.empty
 import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
 
-case class MapWriter(kt: Type, vt: Type) extends IMapWriter {
-
+case class MapWriter(kt: Type, vt: Type) extends IMapWriter {  
+  
   val xs = collection.mutable.Map[IValue, IValue]()
   
   def put(k: IValue, v: IValue) = xs += (k -> v)
@@ -33,8 +33,8 @@ case class MapWriter(kt: Type, vt: Type) extends IMapWriter {
   }
   
   def putAll(ys: java.util.Map[IValue, IValue]) = xs ++= ys 
-  
-  def done = Map(kt, vt, empty ++ xs)
+
+  def done = if (xs isEmpty) Map(TypeFactory.getInstance voidType, TypeFactory.getInstance voidType, empty ++ xs) else Map(kt, vt, empty ++ xs)
 
   def insert(ys: IValue*): Unit = xs ++= (for (y <- ys; z = y.asInstanceOf[ITuple]) yield z.get(0) -> z.get(1))       
       
@@ -42,7 +42,7 @@ case class MapWriter(kt: Type, vt: Type) extends IMapWriter {
 
 }
 
-class MapWriterWithTypeInference() extends MapWriter(TypeFactory.getInstance voidType, TypeFactory.getInstance voidType) {
+case class MapWriterWithTypeInference() extends MapWriter(TypeFactory.getInstance voidType, TypeFactory.getInstance voidType) {
 
   // TODO: move to a common place
   // NOTE: nice example of how to shorten code

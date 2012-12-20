@@ -22,10 +22,13 @@ import collection.immutable.Set.empty
 import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
 
-class RelationWriter(t: Type) extends SetWriter(t) with IRelationWriter {
+case class RelationWriter(t: Type) extends SetWriter(t) with IRelationWriter {
 
-  override def done = Relation(t, xs)
+  override def done = {
+    val resultType = if (xs isEmpty) TypeFactory.getInstance voidType else t
+    Relation(resultType, xs)
+  }
 
 }
 
-class RelationWriterWithTypeInference() extends RelationWriter(TypeFactory.getInstance relType (TypeFactory.getInstance voidType)) with IRelationWriter {}
+case class RelationWriterWithTypeInference() extends RelationWriter(TypeFactory.getInstance relType (TypeFactory.getInstance voidType)) with IRelationWriter {}
