@@ -34,7 +34,8 @@ case class List(et: Type, xs: collection.immutable.List[IValue])
   
   def getElementType = et
 
-  def length = xs length
+  // caching length because of O(n) cost 
+  lazy val length = xs length
 
   def reverse = List(et, xs.reverse)
 
