@@ -21,10 +21,12 @@ import collection.immutable.Vector.empty
 import collection.JavaConversions.asJavaIterator
 
 // TODO: fix odd invocation of tupleType and bug inside
-case class Tuple(xs: Vector[IValue]) extends Value with ITuple {
+case class Tuple(xs: collection.immutable.Vector[IValue]) extends Value with ITuple {
 
   def this() = this(empty)
-  def this(x: IValue, y: IValue) = this(Vector(x, y))
+  def this(xs: Array[IValue]) = this(empty ++ xs)  
+
+  def this(x: IValue, y: IValue) = this(collection.immutable.Vector(x, y))
   
   override lazy val t = TypeFactory.getInstance tupleType (xs: _*)
   
