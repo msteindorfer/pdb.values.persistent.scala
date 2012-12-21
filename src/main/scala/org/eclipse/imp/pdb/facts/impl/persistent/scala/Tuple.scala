@@ -51,11 +51,11 @@ case class Tuple(xs: Vector[IValue]) extends Value with ITuple {
 
   def accept[T](v: IValueVisitor[T]): T = v visitTuple this
 
-  override def equals(other: Any): Boolean = other match {
-    case that: Tuple => (this.xs equals that.xs)
-    case _ => false
-  }
-
-  override lazy val hashCode = xs.hashCode
+//  override def equals(other: Any): Boolean = other match {
+//    case that: Tuple => (this.xs equals that.xs)
+//    case _ => false
+//  }
+//
+//  override lazy val hashCode = xs.hashCode
   
 }

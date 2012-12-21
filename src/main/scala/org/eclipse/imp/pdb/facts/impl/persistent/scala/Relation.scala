@@ -21,10 +21,10 @@ import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.visitors.VisitorException
-
 import collection.immutable.Set.empty
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
+import scala.annotation.tailrec
 
 case class Relation(override val et: Type, override val xs: collection.immutable.Set[IValue])
   extends Set(et, xs) with IRelation {
@@ -61,12 +61,11 @@ case class Relation(override val et: Type, override val xs: collection.immutable
     }
   }
 
+  
   def closure: IRelation = {
-    getType closure // will throw exception if not binary and reflexive
-
-    def calculate(oldSize: Int, r: Relation): Relation = {
+    @tailrec def calculate(oldSize: Int, r: Relation): Relation = {
       if (r.size > oldSize) calculate(r.size, r union (r compose r))
-      else r
+      else r 
     }
 
     calculate(0, this)

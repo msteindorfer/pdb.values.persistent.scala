@@ -47,7 +47,7 @@ class ValueFactory extends BaseValueFactory {
 
   def tuple = new Tuple()
 
-  def tuple(xs: IValue*) = new Tuple(collection.immutable.List.empty ++ xs)
+  def tuple(xs: IValue*) = new Tuple(collection.immutable.Vector.empty ++ xs)
 
   def node(name: String) = new Node(name)
 
