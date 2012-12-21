@@ -47,19 +47,19 @@ class ValueFactory extends BaseValueFactory {
 
   def tuple = new Tuple()
 
-  def tuple(xs: IValue*) = new Tuple(collection.immutable.Vector.empty ++ xs)
+  def tuple(xs: IValue*) = new Tuple(collection.immutable.List.empty ++ xs)
 
   def node(name: String) = new Node(name)
 
-  def node(name: String, children: IValue*) = new Node(name, collection.immutable.Vector.empty ++ children)
+  def node(name: String, children: IValue*) = new Node(name, collection.immutable.List.empty ++ children)
 
-  def node(name: String, annotations: java.util.Map[String, IValue], children: IValue*) = new Node(name, collection.immutable.Map.empty ++ annotations, collection.immutable.Vector.empty ++ children)
+  def node(name: String, annotations: java.util.Map[String, IValue], children: IValue*) = new Node(name, collection.immutable.Map.empty ++ annotations, collection.immutable.List.empty ++ children)
 
   def constructor(t: Type) = new Constructor(t)
 
-  def constructor(t: Type, children: IValue*) = new Constructor(t, collection.immutable.Vector.empty ++ children)
+  def constructor(t: Type, children: IValue*) = new Constructor(t, collection.immutable.List.empty ++ children)
 
-  def constructor(t: Type, annotations: java.util.Map[String, IValue], children: IValue*): IConstructor = new Constructor(t, collection.immutable.Vector.empty ++ children, collection.immutable.Map.empty ++ annotations)
+  def constructor(t: Type, annotations: java.util.Map[String, IValue], children: IValue*): IConstructor = new Constructor(t, collection.immutable.List.empty ++ children, collection.immutable.Map.empty ++ annotations)
 
   def set(t: Type) = setWriter(t).done
 

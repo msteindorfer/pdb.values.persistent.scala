@@ -26,12 +26,12 @@ import collection.JavaConversions.mapAsScalaMap
 /*
  * NOTE: Due to inheritance the name receives a copy of <code>t getName</code> whereas it's a computable property.
  */
-case class Constructor(override val t: Type, override val children: collection.immutable.Vector[IValue], override val annotations: collection.immutable.Map[String, IValue])
+case class Constructor(override val t: Type, override val children: collection.immutable.List[IValue], override val annotations: collection.immutable.Map[String, IValue])
   extends Node(t, t getName, children, annotations) with IConstructor {
     
-  def this(t: Type) = this(t, collection.immutable.Vector.empty, collection.immutable.Map.empty)
+  def this(t: Type) = this(t, collection.immutable.List.empty, collection.immutable.Map.empty)
   
-  def this(t: Type, children: collection.immutable.Vector[IValue]) = this(t, children, collection.immutable.Map.empty)
+  def this(t: Type, children: collection.immutable.List[IValue]) = this(t, children, collection.immutable.Map.empty)
 
   
   /*
