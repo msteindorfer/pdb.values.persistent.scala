@@ -66,7 +66,7 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
   }
 
   def isSubMap(other: IMap) = other match {
-    case Map(_, _, ys) => xs.keys forall (ys.contains _)
+    case Map(_, _, ys) => xs.keys forall (k => (ys contains k) && (ys(k) isEqual xs(k)))
   }
   
   def iterator = xs.keys iterator
