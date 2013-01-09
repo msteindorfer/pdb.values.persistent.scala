@@ -11,25 +11,30 @@
  *******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
+import org.eclipse.imp.pdb.facts.IListRelation
 import org.eclipse.imp.pdb.facts.IListRelationWriter
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.ISet
 import org.eclipse.imp.pdb.facts.ITuple
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
-import collection.immutable.Set.empty
-import collection.JavaConversions.mapAsScalaMap
-import collection.JavaConversions.iterableAsScalaIterable
-import org.eclipse.imp.pdb.facts.IListRelation
 
-class ListRelationWriter(t: Type)
-  extends ListWriter(t)
+class ListRelationWriter(et: Type)
+  extends ListWriter(et)
   with IListRelationWriter {
 
-  override def done: IListRelation = ListOrRel(t, Nil ++ xs)
+  require (et isTupleType)
+  
+  override def done: IListRelation = ListOrRel(et, Nil ++ xs)
   
 }
 
-class ListRelationWriterWithTypeInference()
-  extends ListRelationWriter(TypeFactory.getInstance relType (TypeFactory.getInstance voidType))
-  with IListRelationWriter {}
+sealed class ListRelationWriterWithTypeInference()
+  extends ListRelationWriter(TypeFactory.getInstance voidType)
+  with IListRelationWriter {
+  
+  override def done: IListRelation = {
+    val zs = Nil ++ xs ;
+    ListOrRel(`type` lub zs, zs)
+  }  
+  
+}

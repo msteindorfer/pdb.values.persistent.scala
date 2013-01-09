@@ -16,12 +16,11 @@ import org.eclipse.imp.pdb.facts.IListWriter
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
 import org.eclipse.imp.pdb.facts.exceptions.UnexpectedElementTypeException
-import org.eclipse.imp.pdb.facts.`type`.Type
+import org.eclipse.imp.pdb.facts.`type`._
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.visitors.VisitorException
 
-import collection.immutable.List.empty
 import collection.mutable.ListBuffer
 import collection.JavaConversions.iterableAsScalaIterable
 
@@ -53,18 +52,15 @@ class ListWriter(t: Type) extends IListWriter {
 
   def size = xs size
   
-  def done: IList = ListOrRel(t, empty ++ xs)
+  def done: IList = ListOrRel(t, Nil ++ xs)
 
 }
 
-class ListWriterWithTypeInference() extends ListWriter(TypeFactory.getInstance voidType) {
+sealed class ListWriterWithTypeInference() extends ListWriter(TypeFactory.getInstance voidType) {
 
-  // TODO: move to a common place
-  // NOTE: nice example of how to shorten code
-  def lub(xs: Traversable[IValue]): Type = {
-    xs.foldLeft(TypeFactory.getInstance voidType)((t, x) => t lub x.getType)
+  override def done: IList = {
+    val zs = Nil ++ xs ;
+    ListOrRel(`type` lub zs, zs)
   }
-  
-  override def done: IList = { val zs = empty ++ xs ; ListOrRel(this lub zs, zs) } 
   
 }
