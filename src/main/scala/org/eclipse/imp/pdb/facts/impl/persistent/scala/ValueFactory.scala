@@ -71,7 +71,7 @@ class ValueFactory extends BaseValueFactory {
 
   def setWriter = new SetWriterWithTypeInference()
 
-  def setWriter(t: Type) = if (t isTupleType) new RelationWriter(t) else new SetWriter(t)
+  def setWriter(t: Type) = new SetWriter(t)
 
   def list(t: Type) = listWriter(t).done 
 
@@ -83,7 +83,7 @@ class ValueFactory extends BaseValueFactory {
 
   def listWriter = new ListWriterWithTypeInference()
 
-  def listWriter(t: Type) = if (t isTupleType) new ListRelationWriter(t) else new ListWriter(t)
+  def listWriter(t: Type) = new ListWriter(t)
 
   def relation(t: Type) = setWriter(t).done.asInstanceOf[IRelation]
 
