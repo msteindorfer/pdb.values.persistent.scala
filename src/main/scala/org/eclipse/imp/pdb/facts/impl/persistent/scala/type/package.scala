@@ -11,24 +11,15 @@
  *******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
-import java.io.StringWriter
-
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.io.StandardTextWriter
 import org.eclipse.imp.pdb.facts.`type`.Type
+import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 
-trait Value extends IValue {
+package object `type` {
 
-  def t: Type
-
-  def getType = t
-
-  def isEqual(that: IValue) = this equals that
-
-  final override def toString: String = {
-    val stream = new StringWriter
-    new StandardTextWriter write (this, stream)
-    return stream toString
+  // NOTE: nice example of how to shorten code
+  def lub(xs: Traversable[IValue]): Type = {
+    xs.foldLeft(TypeFactory.getInstance voidType)((t, x) => t lub x.getType)
   }
-
+  
 }

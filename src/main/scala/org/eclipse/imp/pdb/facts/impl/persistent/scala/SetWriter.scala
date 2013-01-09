@@ -14,7 +14,7 @@ package org.eclipse.imp.pdb.facts.impl.persistent.scala
 import org.eclipse.imp.pdb.facts.ISetWriter
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.ISet
-import org.eclipse.imp.pdb.facts.`type`.Type
+import org.eclipse.imp.pdb.facts.`type`._
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 
 import collection.immutable.Set.empty
@@ -37,17 +37,11 @@ class SetWriter(et: Type, var xs: collection.immutable.Set[IValue]) extends ISet
 
 }
 
-class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
-    
-  // TODO: move to a common place
-  // NOTE: nice example of how to shorten code
-  def lub(xs: Traversable[IValue]): Type = {
-    xs.foldLeft(TypeFactory.getInstance voidType)((t, x) => t lub x.getType)
-  }  
+sealed class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
    
   override def done: ISet = {
-    val zs = empty ++ xs ; val lub = this lub zs 
-    SetOrRel(lub, zs)
+    val zs = empty ++ xs ;
+    SetOrRel(`type` lub zs, zs)
   }
   
 }

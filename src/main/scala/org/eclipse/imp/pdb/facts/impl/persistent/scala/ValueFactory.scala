@@ -23,7 +23,9 @@ import org.eclipse.imp.pdb.facts.IList
 import org.eclipse.imp.pdb.facts.IMap
 import org.eclipse.imp.pdb.facts.IMapWriter
 import org.eclipse.imp.pdb.facts.INode
-import org.eclipse.imp.pdb.facts.IValueFactory;
+import org.eclipse.imp.pdb.facts.IRelation
+import org.eclipse.imp.pdb.facts.IListRelation
+import org.eclipse.imp.pdb.facts.IValueFactory
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 
@@ -33,11 +35,6 @@ import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
 
 class ValueFactory extends BaseValueFactory {
-  
-  // NOTE: nice example of how to shorten code
-  private def lub(xs: Seq[IValue]): Type = {
-    xs.foldLeft(TypeFactory.getInstance voidType)((t, x) => t lub x.getType)
-  }
   
   def string(cps: Array[Int]) = {
     this string cps.foldLeft(new java.lang.StringBuilder(cps length))((sb, cp) => sb.appendCodePoint(cp)).toString()
@@ -66,7 +63,11 @@ class ValueFactory extends BaseValueFactory {
 
   def set(t: Type) = setWriter(t).done
 
-  def set(ys: IValue*) = new SetWriter(this lub ys, collection.immutable.Set.empty ++ ys).done
+  def set(xs: IValue*) = {
+    val writer = setWriter
+    writer.insert(xs: _*)
+    writer.done
+  }
 
   def setWriter = new SetWriterWithTypeInference()
 
@@ -74,16 +75,21 @@ class ValueFactory extends BaseValueFactory {
 
   def list(t: Type) = listWriter(t).done 
 
-  def list(xs: IValue*): IList = ListOrRel(this lub xs, Nil ++ xs)
+  def list(xs: IValue*): IList = {
+    val writer = listWriter
+    writer.insert(xs: _*)
+    writer.done
+  }
 
   def listWriter = new ListWriterWithTypeInference()
 
   def listWriter(t: Type) = if (t isTupleType) new ListRelationWriter(t) else new ListWriter(t)
 
-  def relation(t: Type) = relationWriter(t).done
+  def relation(t: Type) = setWriter(t).done.asInstanceOf[IRelation]
 
-  def relation(xs: IValue*) = Relation(this lub xs, collection.immutable.Set.empty ++ xs)
-
+  // TODO: add tests, not yet covered
+  def relation(xs: IValue*) = set(xs: _*).asInstanceOf[IRelation]
+    
   def relationWriter(t: Type) = new RelationWriter(t)
 
   def relationWriter = new RelationWriterWithTypeInference()
@@ -100,7 +106,8 @@ class ValueFactory extends BaseValueFactory {
 
   def listRelation(t: Type) = listRelationWriter(t).done
     
-  def listRelation(xs: IValue*) = ListRelation(this lub xs, Nil ++ xs)
+  // TODO: add tests, not yet covered
+  def listRelation(xs: IValue*) = list(xs: _*).asInstanceOf[IListRelation]
   
   def listRelationWriter(t: Type) = new ListRelationWriter(t)
   
