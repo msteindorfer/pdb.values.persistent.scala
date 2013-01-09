@@ -38,7 +38,7 @@ class ValueFactory extends BaseValueFactory {
   private def lub(xs: Seq[IValue]): Type = {
     xs.foldLeft(TypeFactory.getInstance voidType)((t, x) => t lub x.getType)
   }
-
+  
   def string(cps: Array[Int]) = {
     this string cps.foldLeft(new java.lang.StringBuilder(cps length))((sb, cp) => sb.appendCodePoint(cp)).toString()
   }
@@ -49,6 +49,9 @@ class ValueFactory extends BaseValueFactory {
 
   def tuple(xs: IValue*) = new Tuple(xs.toArray)
 
+  // TODO: currently the type is ignored and recalculated inside the constructor
+  def tuple(t: Type, xs: IValue*) = new Tuple(xs.toArray)
+  
   def node(name: String) = new Node(name)
 
   def node(name: String, children: IValue*) = new Node(name, collection.immutable.List.empty ++ children)
@@ -63,32 +66,44 @@ class ValueFactory extends BaseValueFactory {
 
   def set(t: Type) = setWriter(t).done
 
-  def set(ys: IValue*) = SetWriter(this lub ys, collection.immutable.Set.empty ++ ys).done
+  def set(ys: IValue*) = new SetWriter(this lub ys, collection.immutable.Set.empty ++ ys).done
 
-  def setWriter = SetWriterWithTypeInference()
+  def setWriter = new SetWriterWithTypeInference()
 
   def setWriter(t: Type) = if (t isTupleType) new RelationWriter(t) else new SetWriter(t)
 
   def list(t: Type) = listWriter(t).done 
 
-  def list(xs: IValue*) = List(this lub xs, Nil ++ xs)
+  def list(xs: IValue*): IList = ListOrRel(this lub xs, Nil ++ xs)
 
-  def listWriter = ListWriterWithTypeInference()
+  def listWriter = new ListWriterWithTypeInference()
 
-  def listWriter(t: Type) = ListWriter(t)
+  def listWriter(t: Type) = if (t isTupleType) new ListRelationWriter(t) else new ListWriter(t)
 
   def relation(t: Type) = relationWriter(t).done
 
   def relation(xs: IValue*) = Relation(this lub xs, collection.immutable.Set.empty ++ xs)
 
-  def relationWriter(t: Type) = RelationWriter(t)
+  def relationWriter(t: Type) = new RelationWriter(t)
 
-  def relationWriter = RelationWriterWithTypeInference()
+  def relationWriter = new RelationWriterWithTypeInference()
 
   def map(kt: Type, vt: Type) = mapWriter(kt, vt).done
 
-  def mapWriter = MapWriterWithTypeInference()
+  def mapWriter = new MapWriterWithTypeInference()
 
-  def mapWriter(kt: Type, vt: Type) = MapWriter(kt, vt)
+  def mapWriter(kt: Type, vt: Type) = new MapWriter(kt, vt)
 
+  def map(mapType: Type) = mapWriter(mapType).done    
+  
+  def mapWriter(mapType: Type) = new MapWriter(mapType)
+
+  def listRelation(t: Type) = listRelationWriter(t).done
+    
+  def listRelation(xs: IValue*) = ListRelation(this lub xs, Nil ++ xs)
+  
+  def listRelationWriter(t: Type) = new ListRelationWriter(t)
+  
+  def listRelationWriter = new ListRelationWriterWithTypeInference()
+  
 }

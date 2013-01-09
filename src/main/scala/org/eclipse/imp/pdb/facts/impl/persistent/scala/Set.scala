@@ -42,40 +42,38 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
 
   def contains(x: IValue) = xs contains x
 
-  // TODO: unify with Relation
-  def insert[SetOrRel <: ISet](x: IValue) = Set(this lub x, xs + x).asInstanceOf[SetOrRel]
+  def insert[SetOrRel <: ISet](x: IValue): SetOrRel = SetOrRel(this lub x, xs + x)
 
-  // TODO: unify with Relation
-  def delete[SetOrRel <: ISet](x: IValue) = Set(this lub x, xs - x).asInstanceOf[SetOrRel]
+  def delete[SetOrRel <: ISet](x: IValue): SetOrRel = SetOrRel(this lub x, xs - x)
   
   // TODO: higher order function with operation as parameter
-  def union[SetOrRel <: ISet](other: ISet) = other match {
+  def union[SetOrRel <: ISet](other: ISet): SetOrRel = other match {
     case Set(ot, ys) => {
       val rt = et lub ot
       val rv = xs | ys
 
-      SetWriter(rt, rv).done
-    }.asInstanceOf[SetOrRel]
+      SetOrRel(rt, rv)
+    }
   }
 
   // TODO: higher order function with operation as parameter
-  def intersect[SetOrRel <: ISet](other: ISet) = other match {
+  def intersect[SetOrRel <: ISet](other: ISet): SetOrRel = other match {
     case Set(ot, ys) => {
       val rt = et lub ot
       val rv = xs & ys
 
-      SetWriter(rt, rv).done
-    }.asInstanceOf[SetOrRel]
+      SetOrRel(rt, rv)
+    }
   }
   
   // TODO: higher order function with operation as parameter  
-  def subtract[SetOrRel <: ISet](other: ISet) = other match {
+  def subtract[SetOrRel <: ISet](other: ISet): SetOrRel = other match {
     case Set(ot, ys) => {
       val rt = et // type is different from union and intersect
       val rv = xs &~ ys
 
-      SetWriter(rt, rv).done
-    }.asInstanceOf[SetOrRel]
+      SetOrRel(rt, rv)
+    }
   }
 
   def product(other: ISet): IRelation = other match {

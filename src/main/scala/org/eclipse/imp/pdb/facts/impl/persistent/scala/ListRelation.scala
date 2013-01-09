@@ -11,87 +11,94 @@
  *******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
+import org.eclipse.imp.pdb.facts.IList
+import org.eclipse.imp.pdb.facts.IListRelation
+import org.eclipse.imp.pdb.facts.IListWriter
 import org.eclipse.imp.pdb.facts.ISet
+import org.eclipse.imp.pdb.facts.IListRelation
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.IRelation
-import org.eclipse.imp.pdb.facts.ITuple
 import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
 import org.eclipse.imp.pdb.facts.exceptions.UnexpectedElementTypeException
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.visitors.VisitorException
-import collection.immutable.Set.empty
+import collection.immutable.List.empty
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 import scala.annotation.tailrec
 
-case class Relation(override val et: Type, override val xs: collection.immutable.Set[IValue])
-  extends Set(et, xs) with IRelation {
- 
-  override lazy val t = TypeFactory.getInstance relTypeFromTuple et  
-  
-  override def accept[T](v: IValueVisitor[T]): T = v visitRelation this
-  
+case class ListRelation(override val et: Type, override val xs: collection.immutable.List[IValue]) extends List(et, xs) with IListRelation {
+
+  /*
+   * IListRelation [Additions]
+   */  
   def arity = et getArity 
   
-  def compose(other: IRelation): IRelation = other match {
+  def compose(other: IListRelation): IListRelation = other match {
     case that: Relation => {
       val resultType = getType compose that.getType
       val otherIndexed = that.xs groupBy { _.asInstanceOf[Tuple].get(0) }
 
-      val tuples: collection.immutable.Set[IValue] = for {
-        xy <- this.xs.asInstanceOf[collection.immutable.Set[Tuple]];
+      val tuples: collection.immutable.List[IValue] = for {
+        xy <- this.xs.asInstanceOf[collection.immutable.List[Tuple]];
         yz <- otherIndexed.getOrElse(xy.get(1), empty).asInstanceOf[collection.immutable.Set[Tuple]]
       } yield new Tuple(xy.get(0), yz.get(1))
 
-      Relation(resultType getFieldTypes, tuples)
+      ListRelation(resultType getFieldTypes, tuples)
     }
   }
 
   
-  def closure: IRelation = {
-    @tailrec def calculate(oldSize: Int, r: Relation): Relation = {
-      if (r.size > oldSize) calculate(r.size, r union (r compose r))
+  def closure: IListRelation = {
+    @tailrec def calculate(oldSize: Int, r: ListRelation): ListRelation = {
+      if (r.size > oldSize) calculate(r.size, r concat (r compose r))
       else r 
     }
 
     calculate(0, this)
   }
-
-  def closureStar: IRelation = {
+  
+  def closureStar: IListRelation = {
     val resultElementType = getType.closure getElementType
-    val reflex = Relation(resultElementType, (for (x <- carrier) yield new Tuple(x, x)).toSet)
+    val reflex = ListRelation(resultElementType, (for (x <- carrier) yield new Tuple(x, x)).toList)
 
-    closure union reflex
+    closure concat reflex
   }
 
-  def carrier: ISet = {
+  def carrier: IList = {
     val newElementType = getType.carrier getElementType
-    val newElementSet = Set(newElementType, (for (Tuple(ys) <- xs) yield ys).flatten)
+    val newElementSet = List(newElementType, (for (x <- xs) yield x.asInstanceOf[Tuple].xs).flatten)
 
     newElementSet
-  }
-
+  }  
+  
   def getFieldTypes = t getFieldTypes
 
   def domain = valuesAtIndex(0)
   
   def range = valuesAtIndex(getType.getArity - 1)
 
-  def valuesAtIndex(i: Int): ISet = Set(getType.getFieldType(i), for (Tuple(vs) <- xs) yield vs(i))  
+  def valuesAtIndex(i: Int): IList = List(getType.getFieldType(i), for (Tuple(vs) <- xs) yield vs(i))  
   
-  def select(fields: Int*) = {
+  def select(fields: Int*): IList = {
     val et = getFieldTypes.select(fields: _*)
-    val ys = (for (x <- xs) yield x.asInstanceOf[ITuple] select(fields: _*))
+    val ys = (for (x <- xs) yield x.asInstanceOf[Tuple] select(fields: _*))
 
-    new SetWriter(et, ys).done
-  }  
-  
+    ListOrRel(et, ys)
+  }   
+
   def selectByFieldNames(fields: String*) = this select ((for (s <- fields) yield (getFieldTypes getFieldIndex s)): _*) 
-	
+  
+  override def equals(that: Any): Boolean = that match {
+    case other: List => (this.xs equals other.xs)
+    case _ => false
+  }
+
+  override lazy val hashCode = xs.hashCode  
+  
 }
 
-//object Relation {
-//  def apply(et: Type, xs: collection.immutable.Set[IValue]): Relation = new Relation(et, xs)
+//object ListRelation {
+//  def apply(et: Type, xs: collection.immutable.List[IValue]): ListRelation = new ListRelation(et, xs)
 //}

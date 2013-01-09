@@ -11,43 +11,25 @@
  *******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
-import org.eclipse.imp.pdb.facts.ISetWriter
+import org.eclipse.imp.pdb.facts.IListRelationWriter
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.ISet
+import org.eclipse.imp.pdb.facts.ITuple
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
-
 import collection.immutable.Set.empty
 import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
+import org.eclipse.imp.pdb.facts.IListRelation
 
-class SetWriter(et: Type, var xs: collection.immutable.Set[IValue]) extends ISetWriter {
+class ListRelationWriter(t: Type)
+  extends ListWriter(t)
+  with IListRelationWriter {
 
-  def this(t: Type) = this(t, empty) 
-
-  def size = xs size
-  
-  def done: ISet = SetOrRel(et, xs)
-  
-  def insert(ys: IValue*) { xs = xs ++ ys }       
-      
-  def insertAll(ys: java.lang.Iterable[_ <: IValue]) { xs = xs ++ ys} 
-  
-  def delete(x: IValue) {xs = xs - x}
-
-}
-
-class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
-    
-  // TODO: move to a common place
-  // NOTE: nice example of how to shorten code
-  def lub(xs: Traversable[IValue]): Type = {
-    xs.foldLeft(TypeFactory.getInstance voidType)((t, x) => t lub x.getType)
-  }  
-   
-  override def done: ISet = {
-    val zs = empty ++ xs ; val lub = this lub zs 
-    SetOrRel(lub, zs)
-  }
+  override def done: IListRelation = ListOrRel(t, Nil ++ xs)
   
 }
+
+class ListRelationWriterWithTypeInference()
+  extends ListRelationWriter(TypeFactory.getInstance relType (TypeFactory.getInstance voidType))
+  with IListRelationWriter {}

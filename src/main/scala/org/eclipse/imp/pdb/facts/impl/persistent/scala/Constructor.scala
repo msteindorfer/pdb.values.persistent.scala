@@ -75,3 +75,7 @@ case class Constructor(override val t: Type, override val children: collection.i
   override def accept[T](v: IValueVisitor[T]): T = v visitConstructor this
   
 }
+
+//object Constructor {
+//  def apply(t: Type, children: collection.immutable.List[IValue], annotations: collection.immutable.Map[String, IValue]): Constructor = new Constructor(t, children, annotations)
+//}

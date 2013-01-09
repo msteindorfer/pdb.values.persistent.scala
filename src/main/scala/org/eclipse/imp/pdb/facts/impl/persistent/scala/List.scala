@@ -12,6 +12,7 @@
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.IList
+import org.eclipse.imp.pdb.facts.IListRelation
 import org.eclipse.imp.pdb.facts.IListWriter
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
@@ -37,35 +38,64 @@ case class List(et: Type, xs: collection.immutable.List[IValue])
   // caching length because of O(n) cost 
   lazy val length = xs length
 
-  def reverse = List(et, xs.reverse)
+  def reverse[ListOrRel <: IList](): ListOrRel = ListOrRel(et, xs.reverse)
 
-  def append(x: IValue) = List(this lub x, xs :+ x)
+  def append[ListOrRel <: IList](x: IValue): ListOrRel = ListOrRel(this lub x, xs :+ x)
 
-  def insert(x: IValue) = List(this lub x, x :: xs)
+  def insert[ListOrRel <: IList](x: IValue): ListOrRel = ListOrRel(this lub x, x :: xs)
 
-  def concat(other: IList) = other match {
-    case List(_, ys) => List(this lub other, xs ::: ys)
+  def concat[ListOrRel <: IList](other: IList): ListOrRel = other match {
+    case List(_, ys) => ListOrRel(this lub other, xs ::: ys)
   }
 
-  def put(i: Int, x: IValue) = List(this lub x, xs updated (i, x))
+  def put[ListOrRel <: IList](i: Int, x: IValue): ListOrRel = ListOrRel(this lub x, xs updated (i, x))
 
   def get(i: Int) = xs(i)
 
-  def sublist(i: Int, n: Int) = { 
+  def sublist[ListOrRel <: IList](i: Int, n: Int): ListOrRel = { 
     if (i < 0 || n < 0 || i + n > length) { throw new IndexOutOfBoundsException() } /* for compatibility with Rascal test suite */
-    List(et, xs slice (i, i + n))
+    ListOrRel(et, xs slice (i, i + n))
   }
 
   def isEmpty = xs isEmpty
 
   def contains(e: IValue) = xs contains e
 
-  def delete(x: IValue) = xs indexOf x match {
-    case i => if (i == -1) this else delete(i)
+  def delete[ListOrRel <: IList](x: IValue): ListOrRel = xs indexOf x match {
+    case i => if (i == -1) this.asInstanceOf[ListOrRel] else delete(i)
   }
 
-  def delete(i: Int) = List(et, (xs take i) ::: (xs drop i + 1))
+  def delete[ListOrRel <: IList](i: Int): ListOrRel = ListOrRel(et, (xs take i) ::: (xs drop i + 1))
 
+  def intersect[ListOrRel <: IList](other: IList): ListOrRel = other match {
+    case List(ot, ys) => {
+      val rt = et lub ot
+      val rv = for (x <- xs if ys contains x) yield x
+
+      ListOrRel(rt, rv)
+    }
+  }
+  
+  def subtract[ListOrRel <: IList](other: IList): ListOrRel = other match {
+    case List(ot, ys) => ListOrRel(ot, xs diff ys)
+  }
+
+  def product(other: IList): IListRelation = other match {
+    case List(ot, ys) => {
+      val productType = TypeFactory.getInstance tupleType (et, ot)
+      ListOrRel(productType, (for (x <- xs; y <- ys) yield new Tuple(x, y)))
+    }
+  }
+
+  // TODO: stop if iterator is exhausted
+  // NOTE: uses mutable BufferedIterator
+  def isSubListOf(other: IList): Boolean = other match {
+    case List(ot, ys) => {
+      val it = xs.iterator.buffered      
+      ys foreach ((y) => if (it.hasNext && it.head == y) it.next); it.isEmpty 
+    }
+  }
+    
   def iterator = xs iterator
 
   def accept[T](v: IValueVisitor[T]): T = v visitList this

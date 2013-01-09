@@ -11,25 +11,14 @@
  *******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
-import org.eclipse.imp.pdb.facts.IRelationWriter
+import org.eclipse.imp.pdb.facts.IList
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.ISet
-import org.eclipse.imp.pdb.facts.ITuple
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
-import collection.immutable.Set.empty
-import collection.JavaConversions.mapAsScalaMap
-import collection.JavaConversions.iterableAsScalaIterable
-import org.eclipse.imp.pdb.facts.IRelation
 
-class RelationWriter(t: Type)
-  extends SetWriter(t) 
-  with IRelationWriter {
-
-  override def done: IRelation = SetOrRel(t, xs)
-
+object ListOrRel {
+  def apply[ListOrRel <: IList](et: Type, xs: collection.immutable.List[IValue]): ListOrRel = {
+    val elementType = if (xs isEmpty) TypeFactory.getInstance voidType else et
+    if (elementType isTupleType) ListRelation(elementType, xs) else List(elementType, xs)    
+  }.asInstanceOf[ListOrRel]
 }
-
-class RelationWriterWithTypeInference() 
-  extends RelationWriter(TypeFactory.getInstance relType (TypeFactory.getInstance voidType))
-  with IRelationWriter {}

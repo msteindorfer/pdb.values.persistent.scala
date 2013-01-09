@@ -22,7 +22,9 @@ import collection.immutable.Map.empty
 import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
 
-case class MapWriter(kt: Type, vt: Type) extends IMapWriter {  
+class MapWriter(kt: Type, vt: Type) extends IMapWriter {  
+  
+  def this(mapType: Type) = this(mapType.getKeyType, mapType.getValueType)
   
   val xs = collection.mutable.Map[IValue, IValue]()
   
@@ -42,7 +44,7 @@ case class MapWriter(kt: Type, vt: Type) extends IMapWriter {
 
 }
 
-case class MapWriterWithTypeInference() extends MapWriter(TypeFactory.getInstance voidType, TypeFactory.getInstance voidType) {
+class MapWriterWithTypeInference() extends MapWriter(TypeFactory.getInstance voidType, TypeFactory.getInstance voidType) {
 
   // TODO: move to a common place
   // NOTE: nice example of how to shorten code
