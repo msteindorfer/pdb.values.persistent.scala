@@ -26,7 +26,7 @@ import collection.immutable.Set.empty
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
-case class Set(et: Type, xs: collection.immutable.Set[IValue])
+class Set(val et: Type, val xs: collection.immutable.Set[IValue])
   extends Value with ISet {
   
   protected def lub(e: IValue) = et lub e.getType
@@ -98,4 +98,9 @@ case class Set(et: Type, xs: collection.immutable.Set[IValue])
 
   override lazy val hashCode = xs.hashCode
   
+}
+
+object Set {
+  def apply(et: Type, xs: collection.immutable.Set[IValue]): Set = new Set(et, xs)
+  def unapply(s: Set) = Some(s.et, s.xs)
 }

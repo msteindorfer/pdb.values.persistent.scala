@@ -25,7 +25,7 @@ import org.eclipse.imp.pdb.facts.visitors.VisitorException
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
-case class List(et: Type, xs: collection.immutable.List[IValue])
+class List(val et: Type, val xs: collection.immutable.List[IValue])
   extends Value with IList {
 
   private def lub(e: IValue) = et lub e.getType
@@ -107,4 +107,9 @@ case class List(et: Type, xs: collection.immutable.List[IValue])
 
   override lazy val hashCode = xs.hashCode
 
+}
+
+object List {
+  def apply(et: Type, xs: collection.immutable.List[IValue]): List = new List(et, xs)
+  def unapply(l: List) = Some(l.et, l.xs)
 }
