@@ -73,6 +73,21 @@ case class Constructor(override val t: Type, override val children: collection.i
   override def getType = t getAbstractDataType
   
   override def accept[T](v: IValueVisitor[T]): T = v visitConstructor this
+
+  override lazy val hashCode = {
+    val hashFormula = (h: Int, x: IValue) => (h << 1) ^ (h >> 1) ^ x.hashCode
+    children.foldLeft(name.hashCode)(hashFormula)
+  }
+
+  override def equals(that: Any): Boolean = that match {
+    case other: Constructor => {
+      (this.t comparable other.t) &&
+        (this.children.length == other.children.length) &&
+        (this.name == other.name) &&
+        (0 until children.length).forall(i => this.children(i) equals other.children(i))
+    }
+    case _ => false
+  }  
   
 }
 
