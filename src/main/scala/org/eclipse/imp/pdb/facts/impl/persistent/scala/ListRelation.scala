@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 CWI
+ * Copyright (c) 2012-2013 CWI
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,10 @@ import scala.annotation.tailrec
 
 case class ListRelation(override val et: Type, override val xs: collection.immutable.List[IValue]) extends List(et, xs) with IListRelation {
 
+  override lazy val t = TypeFactory.getInstance lrelTypeFromTuple et  
+  
+  override def accept[T](v: IValueVisitor[T]): T = v visitListRelation this  
+  
   /*
    * IListRelation [Additions]
    */  
