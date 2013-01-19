@@ -21,9 +21,8 @@ import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.visitors.VisitorException
+
 import collection.immutable.Set.empty
-import collection.JavaConversions.asJavaIterator
-import collection.JavaConversions.iterableAsScalaIterable
 import scala.annotation.tailrec
 
 case class Relation(override val et: Type, override val xs: collection.immutable.Set[IValue])
@@ -38,12 +37,12 @@ case class Relation(override val et: Type, override val xs: collection.immutable
   def compose(other: IRelation): IRelation = other match {
     case that: Relation => {
       val resultType = getType compose that.getType
-      val otherIndexed = that.xs groupBy { _.asInstanceOf[Tuple].get(0) }
+      val otherIndexed = that.xs groupBy { _.asInstanceOf[ITuple].get(0) }
 
       val tuples: collection.immutable.Set[IValue] = for {
-        xy <- this.xs.asInstanceOf[collection.immutable.Set[Tuple]];
-        yz <- otherIndexed.getOrElse(xy.get(1), empty).asInstanceOf[collection.immutable.Set[Tuple]]
-      } yield new Tuple(xy.get(0), yz.get(1))
+        xy <- this.xs.asInstanceOf[collection.immutable.Set[ITuple]];
+        yz <- otherIndexed.getOrElse(xy.get(1), empty).asInstanceOf[collection.immutable.Set[ITuple]]
+      } yield Tuple(xy.get(0), yz.get(1))
 
       Relation(resultType getFieldTypes, tuples)
     }
@@ -61,16 +60,19 @@ case class Relation(override val et: Type, override val xs: collection.immutable
 
   def closureStar: IRelation = {
     val resultElementType = getType.closure getElementType
-    val reflex = Relation(resultElementType, (for (x <- carrier) yield new Tuple(x, x)).toSet)
+    val reflex = Relation(resultElementType, (for (x <- carrier.asInstanceOf[Set].xs) yield Tuple(x, x)).toSet)
 
     closure union reflex
   }
 
   def carrier: ISet = {
     val newElementType = getType.carrier getElementType
-    val newElementSet = Set(newElementType, (for (Tuple(ys) <- xs) yield ys).flatten)
-
-    newElementSet
+//    val newElementData = (for (tuple <- xs; x <- tuple.asInstanceOf[Tuple].xs) yield x)
+    
+    val newElementData = new collection.mutable.SetBuilder[IValue, collection.immutable.Set[IValue]](empty) 
+    for (tuple <- xs; x <- tuple.asInstanceOf[Tuple].xs) newElementData += x
+    
+    Set(newElementType, newElementData.result)
   }
 
   def getFieldTypes = t getFieldTypes

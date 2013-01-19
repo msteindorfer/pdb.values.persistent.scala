@@ -42,12 +42,12 @@ class ValueFactory extends BaseValueFactory {
 
   def string(cp: Int) = this string Array(cp)
 
-  def tuple = new Tuple()
+  def tuple = Tuple()
 
-  def tuple(xs: IValue*) = new Tuple(xs.toArray)
+  def tuple(xs: IValue*) = Tuple(xs: _*)
 
   // TODO: currently the type is ignored and recalculated inside the constructor
-  def tuple(t: Type, xs: IValue*) = new Tuple(xs.toArray)
+  def tuple(t: Type, xs: IValue*) = Tuple(xs: _*)
   
   def node(name: String) = new Node(name)
 

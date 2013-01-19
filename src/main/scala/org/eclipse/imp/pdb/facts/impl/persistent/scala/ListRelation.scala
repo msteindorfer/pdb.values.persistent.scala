@@ -27,6 +27,7 @@ import collection.immutable.List.empty
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 import scala.annotation.tailrec
+import org.eclipse.imp.pdb.facts.ITuple
 
 case class ListRelation(override val et: Type, override val xs: collection.immutable.List[IValue]) extends List(et, xs) with IListRelation {
 
@@ -42,12 +43,12 @@ case class ListRelation(override val et: Type, override val xs: collection.immut
   def compose(other: IListRelation): IListRelation = other match {
     case that: Relation => {
       val resultType = getType compose that.getType
-      val otherIndexed = that.xs groupBy { _.asInstanceOf[Tuple].get(0) }
+      val otherIndexed = that.xs groupBy { _.asInstanceOf[ITuple].get(0) }
 
       val tuples: collection.immutable.List[IValue] = for {
-        xy <- this.xs.asInstanceOf[collection.immutable.List[Tuple]];
-        yz <- otherIndexed.getOrElse(xy.get(1), empty).asInstanceOf[collection.immutable.Set[Tuple]]
-      } yield new Tuple(xy.get(0), yz.get(1))
+        xy <- this.xs.asInstanceOf[collection.immutable.List[ITuple]];
+        yz <- otherIndexed.getOrElse(xy.get(1), empty).asInstanceOf[collection.immutable.Set[ITuple]]
+      } yield Tuple(xy.get(0), yz.get(1))
 
       ListRelation(resultType getFieldTypes, tuples)
     }
@@ -65,7 +66,7 @@ case class ListRelation(override val et: Type, override val xs: collection.immut
   
   def closureStar: IListRelation = {
     val resultElementType = getType.closure getElementType
-    val reflex = ListRelation(resultElementType, (for (x <- carrier) yield new Tuple(x, x)).toList)
+    val reflex = ListRelation(resultElementType, (for (x <- carrier) yield Tuple(x, x)).toList)
 
     closure concat reflex
   }
@@ -87,7 +88,7 @@ case class ListRelation(override val et: Type, override val xs: collection.immut
   
   def select(fields: Int*): IList = {
     val et = getFieldTypes.select(fields: _*)
-    val ys = (for (x <- xs) yield x.asInstanceOf[Tuple] select(fields: _*))
+    val ys = (for (x <- xs) yield x.asInstanceOf[ITuple] select(fields: _*))
 
     ListOrRel(et, ys)
   }   
@@ -102,7 +103,3 @@ case class ListRelation(override val et: Type, override val xs: collection.immut
   override lazy val hashCode = xs.hashCode  
   
 }
-
-//object ListRelation {
-//  def apply(et: Type, xs: collection.immutable.List[IValue]): ListRelation = new ListRelation(et, xs)
-//}

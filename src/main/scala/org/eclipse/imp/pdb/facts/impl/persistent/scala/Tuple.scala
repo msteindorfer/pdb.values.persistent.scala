@@ -17,47 +17,51 @@ import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 
-import collection.immutable.Vector.empty
 import collection.JavaConversions.asJavaIterator
 
 // TODO: fix odd invocation of tupleType and bug inside
-case class Tuple(xs: collection.immutable.Vector[IValue]) extends Value with ITuple {
-
-  def this() = this(empty)
-  def this(xs: Array[IValue]) = this(empty ++ xs)  
-
-  def this(x: IValue, y: IValue) = this(collection.immutable.Vector(x, y))
-  
+class Tuple(val xs: Tuple.Coll) extends Value with ITuple {
+    
   override lazy val t = TypeFactory.getInstance tupleType (xs: _*)
   
-  def arity = xs size
+  def arity = xs.size
   
   def get(i: Int) = xs(i)
 
   def get(l: String) = this get (t getFieldIndex l)
 
-  def set(i: Int, x: IValue) = Tuple(xs updated (i, x))
+  def set(i: Int, x: IValue): ITuple = Tuple(xs updated (i, x))
 
-  def set(l: String, x: IValue) = this set (t getFieldIndex l, x)
+  def set(l: String, x: IValue): ITuple = this set (t getFieldIndex l, x)
   
   def select(fields: Int*) = { 
-    if (t.select(fields: _*) isTupleType)
-      Tuple(empty ++ (for (i <- fields) yield xs(i)))
+    if (t.select(fields: _*).isTupleType)
+      Tuple((for (i <- fields) yield xs(i)): _*)
     else
       get(fields(0)) // TODO: ensure that one element is present
   }
   
   def selectByFieldNames(fields: String*) = this select ((for (s <- fields) yield (t getFieldIndex s)): _*) 
   
-  def iterator = xs iterator
+  def iterator = xs.iterator
 
   def accept[T](v: IValueVisitor[T]): T = v visitTuple this
 
-//  override def equals(other: Any): Boolean = other match {
-//    case that: Tuple => (this.xs equals that.xs)
-//    case _ => false
-//  }
-//
-//  override lazy val hashCode = xs.hashCode
+  override def equals(other: Any): Boolean = other match {
+    case that: Tuple => (this.xs equals that.xs)
+    case _ => false
+  }
+
+  override lazy val hashCode = xs.hashCode
   
+}
+
+object Tuple {  
+  type Coll = collection.IndexedSeq[IValue]
+  val empty = collection.immutable.Vector.empty[IValue]
+  
+  def apply(xs: Coll): ITuple = new Tuple(xs)
+  def unapply(t: Tuple) = Some(t.xs)
+  
+  def apply(xs: IValue*): ITuple = new Tuple(empty ++ xs)
 }

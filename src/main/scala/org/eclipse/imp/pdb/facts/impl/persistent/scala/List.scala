@@ -83,7 +83,7 @@ class List(val et: Type, val xs: collection.immutable.List[IValue])
   def product(other: IList): IListRelation = other match {
     case List(ot, ys) => {
       val productType = TypeFactory.getInstance tupleType (et, ot)
-      ListOrRel(productType, (for (x <- xs; y <- ys) yield new Tuple(x, y)))
+      ListOrRel(productType, (for (x <- xs; y <- ys) yield Tuple(x, y)))
     }
   }
 
