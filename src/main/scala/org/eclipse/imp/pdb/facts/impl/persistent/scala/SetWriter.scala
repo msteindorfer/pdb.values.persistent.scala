@@ -17,15 +17,14 @@ import org.eclipse.imp.pdb.facts.ISet
 import org.eclipse.imp.pdb.facts.`type`._
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 
-import collection.immutable.Set.empty
-import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
 
-class SetWriter(et: Type, var xs: collection.immutable.Set[IValue]) extends ISetWriter {
 
-  def this(t: Type) = this(t, empty) 
+class SetWriter(et: Type, var xs: Set.Coll) extends ISetWriter {
 
-  def size = xs size
+  def this(t: Type) = this(t, Set.empty) 
+
+  def size = xs.size
   
   def done: ISet = SetOrRel(et, xs)
   
@@ -39,9 +38,6 @@ class SetWriter(et: Type, var xs: collection.immutable.Set[IValue]) extends ISet
 
 sealed class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
    
-  override def done: ISet = {
-    val zs = empty ++ xs ;
-    SetOrRel(`type` lub zs, zs)
-  }
+  override def done: ISet = SetOrRel(`type` lub xs, xs)
   
 }

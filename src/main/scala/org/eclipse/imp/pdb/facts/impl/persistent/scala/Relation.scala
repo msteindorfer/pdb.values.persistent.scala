@@ -25,7 +25,7 @@ import org.eclipse.imp.pdb.facts.visitors.VisitorException
 import collection.immutable.Set.empty
 import scala.annotation.tailrec
 
-case class Relation(override val et: Type, override val xs: collection.immutable.Set[IValue])
+case class Relation(override val et: Type, override val xs: Set.Coll)
   extends Set(et, xs) with IRelation {
  
   override lazy val t = TypeFactory.getInstance relTypeFromTuple et  
@@ -67,12 +67,9 @@ case class Relation(override val et: Type, override val xs: collection.immutable
 
   def carrier: ISet = {
     val newElementType = getType.carrier getElementType
-//    val newElementData = (for (tuple <- xs; x <- tuple.asInstanceOf[Tuple].xs) yield x)
+    val newElementData = (for (tuple <- xs; x <- tuple.asInstanceOf[Tuple].xs) yield x)
     
-    val newElementData = new collection.mutable.SetBuilder[IValue, collection.immutable.Set[IValue]](empty) 
-    for (tuple <- xs; x <- tuple.asInstanceOf[Tuple].xs) newElementData += x
-    
-    Set(newElementType, newElementData.result)
+    Set(newElementType, newElementData)
   }
 
   def getFieldTypes = t getFieldTypes

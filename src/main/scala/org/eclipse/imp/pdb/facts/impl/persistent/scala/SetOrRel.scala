@@ -17,7 +17,7 @@ import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 
 object SetOrRel {
-  def apply[SetOrRel <: ISet](et: Type, xs: collection.immutable.Set[IValue]): SetOrRel = {
+  def apply[SetOrRel <: ISet](et: Type, xs: Set.Coll): SetOrRel = {
     val elementType = if (xs isEmpty) TypeFactory.getInstance voidType else et
     if (elementType isTupleType) Relation(elementType, xs) else Set(elementType, xs)    
   }.asInstanceOf[SetOrRel]

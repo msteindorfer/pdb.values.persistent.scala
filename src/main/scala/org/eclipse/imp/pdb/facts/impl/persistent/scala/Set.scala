@@ -22,11 +22,10 @@ import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.visitors.VisitorException
 
-import collection.immutable.Set.empty
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
-class Set(val et: Type, val xs: collection.immutable.Set[IValue])
+class Set(val et: Type, val xs: Set.Coll)
   extends Value with ISet {
   
   protected def lub(e: IValue) = et lub e.getType
@@ -36,9 +35,9 @@ class Set(val et: Type, val xs: collection.immutable.Set[IValue])
   
   def getElementType = et
 
-  def isEmpty = xs isEmpty
+  def isEmpty = xs.isEmpty
 
-  def size = xs size
+  def size = xs.size
 
   def contains(x: IValue) = xs contains x
 
@@ -79,7 +78,7 @@ class Set(val et: Type, val xs: collection.immutable.Set[IValue])
   def product(other: ISet): IRelation = other match {
     case Set(ot, ys) => {
       val productType = TypeFactory.getInstance tupleType (et, ot)
-      Relation(productType, for (x <- xs; y <- ys) yield new Tuple(x, y))
+      Relation(productType, for (x <- xs; y <- ys) yield Tuple(x, y))
     }
   }
 
@@ -87,7 +86,7 @@ class Set(val et: Type, val xs: collection.immutable.Set[IValue])
     case Set(_, ys) => xs subsetOf ys
   }
 
-  def iterator = xs iterator
+  def iterator = xs.iterator
 
   def accept[T](v: IValueVisitor[T]): T = v visitSet this
 
@@ -101,6 +100,9 @@ class Set(val et: Type, val xs: collection.immutable.Set[IValue])
 }
 
 object Set {
-  def apply(et: Type, xs: collection.immutable.Set[IValue]): Set = new Set(et, xs)
+  type Coll = collection.Set[IValue]
+  val empty = collection.immutable.Set.empty[IValue]
+  
+  def apply(et: Type, xs: Coll): ISet = new Set(et, xs)
   def unapply(s: Set) = Some(s.et, s.xs)
 }

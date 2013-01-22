@@ -19,8 +19,6 @@ import org.eclipse.imp.pdb.facts.ITuple
 import org.eclipse.imp.pdb.facts.`type`._
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 
-import collection.immutable.Set.empty
-import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
 
 class RelationWriter(et: Type)
@@ -37,9 +35,6 @@ sealed class RelationWriterWithTypeInference()
   extends RelationWriter(TypeFactory.getInstance voidType)
   with IRelationWriter {
   
-  override def done: IRelation = {
-    val zs = empty ++ xs ;
-    SetOrRel(`type` lub zs, zs)
-  }
+  override def done: IRelation = SetOrRel(`type` lub xs, xs)
   
 }
