@@ -94,7 +94,9 @@ case class ListRelation(override val et: Type, override val xs: collection.immut
   }   
 
   def selectByFieldNames(fields: String*) = this select ((for (s <- fields) yield (getFieldTypes getFieldIndex s)): _*) 
-  
+ 
+  override def replace[ListOrRel <: IList](first: Int, second: Int, end: Int, repl: IList): ListOrRel = ???
+
   override def equals(that: Any): Boolean = that match {
     case other: List => (this.xs equals other.xs)
     case _ => false

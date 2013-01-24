@@ -16,11 +16,11 @@ import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
-
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
+import org.eclipse.imp.pdb.facts.IList
 
 class Node(override val t: Type, val name: String, val children: collection.immutable.List[IValue], val annotations: collection.immutable.Map[String, IValue])
   extends Value with INode {
@@ -61,6 +61,8 @@ class Node(override val t: Type, val name: String, val children: collection.immu
 
   def removeAnnotations = Node(t, name, children, collection.immutable.Map.empty)
 
+  def replace(first: Int, second: Int, end: Int, repl: IList) = ???
+  
   def accept[T](v: IValueVisitor[T]): T = v visitNode this
 
   override lazy val hashCode = {

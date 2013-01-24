@@ -96,10 +96,12 @@ class List(val et: Type, val xs: collection.immutable.List[IValue])
     }
   }
     
+  def replace[ListOrRel <: IList](first: Int, second: Int, end: Int, repl: IList): ListOrRel = ???  
+  
   def iterator = xs iterator
 
-  def accept[T](v: IValueVisitor[T]): T = v visitList this
-
+  def accept[T](v: IValueVisitor[T]): T = v visitList this 
+  
   override def equals(that: Any): Boolean = that match {
     case other: List => (this.xs equals other.xs)
     case _ => false

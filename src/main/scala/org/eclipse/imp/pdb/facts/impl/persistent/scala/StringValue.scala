@@ -83,4 +83,6 @@ case class StringValue(val content: String) extends Value with IString {
    */
   def charAt(index: Int): Int = content.codePointAt(content.offsetByCodePoints(0, index))
 
+  def replace(first: Int, second: Int, end: Int, repl: IString): IString = ???
+ 
 }
