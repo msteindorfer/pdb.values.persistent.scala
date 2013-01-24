@@ -41,13 +41,13 @@ case class ListRelation(override val et: Type, override val xs: collection.immut
   def arity = et getArity 
   
   def compose(other: IListRelation): IListRelation = other match {
-    case that: Relation => {
+    case that: ListRelation => {
       val resultType = getType compose that.getType
       val otherIndexed = that.xs groupBy { _.asInstanceOf[ITuple].get(0) }
 
       val tuples: collection.immutable.List[IValue] = for {
         xy <- this.xs.asInstanceOf[collection.immutable.List[ITuple]];
-        yz <- otherIndexed.getOrElse(xy.get(1), empty).asInstanceOf[collection.immutable.Set[ITuple]]
+        yz <- otherIndexed.getOrElse(xy.get(1), empty).asInstanceOf[collection.immutable.List[ITuple]]
       } yield Tuple(xy.get(0), yz.get(1))
 
       ListRelation(resultType getFieldTypes, tuples)
