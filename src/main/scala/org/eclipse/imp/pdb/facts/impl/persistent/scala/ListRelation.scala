@@ -45,7 +45,7 @@ case class ListRelation(override val et: Type, override val xs: List.Coll) exten
       val resultType = getType compose that.getType
       val otherIndexed = that.xs groupBy { _.asInstanceOf[ITuple].get(0) }
 
-      val tuples: collection.immutable.List[IValue] = for {
+      val tuples = for {
         xy <- this.xs.asInstanceOf[collection.immutable.List[ITuple]];
         yz <- otherIndexed.getOrElse(xy.get(1), empty).asInstanceOf[collection.immutable.List[ITuple]]
       } yield Tuple(xy.get(0), yz.get(1))
@@ -66,7 +66,7 @@ case class ListRelation(override val et: Type, override val xs: List.Coll) exten
   
   def closureStar: IListRelation = {
     val resultElementType = getType.closure getElementType
-    val reflex = ListRelation(resultElementType, (for (x <- carrier) yield Tuple(x, x)).toList)
+    val reflex = ListRelation(resultElementType, List.empty ++ (for (x <- carrier) yield Tuple(resultElementType, x, x)))
 
     closure concat reflex
   }

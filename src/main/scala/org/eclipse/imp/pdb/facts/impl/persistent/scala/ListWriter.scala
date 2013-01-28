@@ -52,14 +52,14 @@ class ListWriter(t: Type) extends IListWriter {
 
   def size = xs size
   
-  def done: IList = ListOrRel(t, Nil ++ xs)
+  def done: IList = ListOrRel(t, List.empty ++ xs)
 
 }
 
 sealed class ListWriterWithTypeInference() extends ListWriter(TypeFactory.getInstance voidType) {
 
   override def done: IList = {
-    val zs = Nil ++ xs ;
+    val zs = List.empty ++ xs;
     ListOrRel(`type` lub zs, zs)
   }
   
