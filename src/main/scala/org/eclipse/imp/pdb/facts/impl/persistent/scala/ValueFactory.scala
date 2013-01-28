@@ -113,4 +113,6 @@ class ValueFactory extends BaseValueFactory {
   
   def listRelationWriter = new ListRelationWriterWithTypeInference()
   
+  override def toString = "VF_SCALA"
+  
 }
