@@ -29,7 +29,7 @@ import collection.JavaConversions.iterableAsScalaIterable
 import scala.annotation.tailrec
 import org.eclipse.imp.pdb.facts.ITuple
 
-case class ListRelation(override val et: Type, override val xs: collection.immutable.List[IValue]) extends List(et, xs) with IListRelation {
+case class ListRelation(override val et: Type, override val xs: List.Coll) extends List(et, xs) with IListRelation {
 
   override lazy val t = TypeFactory.getInstance lrelTypeFromTuple et  
   

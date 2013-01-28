@@ -25,7 +25,7 @@ import org.eclipse.imp.pdb.facts.visitors.VisitorException
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
-class List(val et: Type, val xs: collection.immutable.List[IValue])
+class List(val et: Type, val xs: List.Coll)
   extends Value with IList {
 
   private def lub(e: IValue) = et lub e.getType
@@ -36,16 +36,16 @@ class List(val et: Type, val xs: collection.immutable.List[IValue])
   def getElementType = et
 
   // caching length because of O(n) cost 
-  lazy val length = xs length
+  lazy val length = xs.length
 
   def reverse[ListOrRel <: IList](): ListOrRel = ListOrRel(et, xs.reverse)
 
   def append[ListOrRel <: IList](x: IValue): ListOrRel = ListOrRel(this lub x, xs :+ x)
 
-  def insert[ListOrRel <: IList](x: IValue): ListOrRel = ListOrRel(this lub x, x :: xs)
+  def insert[ListOrRel <: IList](x: IValue): ListOrRel = ListOrRel(this lub x, x +: xs)
 
   def concat[ListOrRel <: IList](other: IList): ListOrRel = other match {
-    case List(_, ys) => ListOrRel(this lub other, xs ::: ys)
+    case List(_, ys) => ListOrRel(this lub other, xs ++: ys)
   }
 
   def put[ListOrRel <: IList](i: Int, x: IValue): ListOrRel = ListOrRel(this lub x, xs updated (i, x))
@@ -57,7 +57,7 @@ class List(val et: Type, val xs: collection.immutable.List[IValue])
     ListOrRel(et, xs slice (i, i + n))
   }
 
-  def isEmpty = xs isEmpty
+  def isEmpty = xs.isEmpty
 
   def contains(e: IValue) = xs contains e
 
@@ -65,7 +65,7 @@ class List(val et: Type, val xs: collection.immutable.List[IValue])
     case i => if (i == -1) this.asInstanceOf[ListOrRel] else delete(i)
   }
 
-  def delete[ListOrRel <: IList](i: Int): ListOrRel = ListOrRel(et, (xs take i) ::: (xs drop i + 1))
+  def delete[ListOrRel <: IList](i: Int): ListOrRel = ListOrRel(et, (xs take i) ++: (xs drop i + 1))
 
   def intersect[ListOrRel <: IList](other: IList): ListOrRel = other match {
     case List(ot, ys) => {
@@ -98,7 +98,7 @@ class List(val et: Type, val xs: collection.immutable.List[IValue])
     
   def replace[ListOrRel <: IList](first: Int, second: Int, end: Int, repl: IList): ListOrRel = ???  
   
-  def iterator = xs iterator
+  def iterator = xs.iterator
 
   def accept[T](v: IValueVisitor[T]): T = v visitList this 
   
@@ -112,6 +112,9 @@ class List(val et: Type, val xs: collection.immutable.List[IValue])
 }
 
 object List {
-  def apply(et: Type, xs: collection.immutable.List[IValue]): List = new List(et, xs)
+  type Coll = collection.LinearSeq[IValue]
+  val empty = collection.immutable.List.empty[IValue]
+  
+  def apply(et: Type, xs: List.Coll): List = new List(et, xs)
   def unapply(l: List) = Some(l.et, l.xs)
 }

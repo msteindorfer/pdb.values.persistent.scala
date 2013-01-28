@@ -17,7 +17,7 @@ import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 
 object ListOrRel {
-  def apply[ListOrRel <: IList](et: Type, xs: collection.immutable.List[IValue]): ListOrRel = {
+  def apply[ListOrRel <: IList](et: Type, xs: List.Coll): ListOrRel = {
     val elementType = if (xs isEmpty) TypeFactory.getInstance voidType else et
     if (elementType isTupleType) ListRelation(elementType, xs) else List(elementType, xs)    
   }.asInstanceOf[ListOrRel]
