@@ -21,7 +21,6 @@ import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.visitors.VisitorException
-
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
@@ -74,11 +73,11 @@ class Set(val et: Type, val xs: Set.Coll)
       SetOrRel(rt, rv)
     }
   }
-
+  
   def product(other: ISet): IRelation = other match {
     case Set(ot, ys) => {
-      val productType = TypeFactory.getInstance tupleType (et, ot)
-      Relation(productType, for (x <- xs; y <- ys) yield Tuple(x, y))
+      val tupleType = TypeFactory.getInstance tupleType (et, ot)
+      Relation(tupleType, for (x <- xs; y <- ys) yield Tuple(tupleType, x, y))
     }
   }
 

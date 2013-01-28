@@ -51,8 +51,8 @@ case class Relation(override val et: Type, override val xs: Set.Coll)
   
   def closure: IRelation = {
     @tailrec def calculate(oldSize: Int, r: Relation): Relation = {
-      if (r.size > oldSize) calculate(r.size, r union (r compose r))
-      else r 
+      if (r.size == oldSize) r
+      else calculate(r.size, r union (r compose r))
     }
 
     calculate(0, this)
@@ -78,16 +78,16 @@ case class Relation(override val et: Type, override val xs: Set.Coll)
   
   def range = valuesAtIndex(getType.getArity - 1)
 
-  def valuesAtIndex(i: Int): ISet = Set(getType.getFieldType(i), for (Tuple(vs) <- xs) yield vs(i))  
+  def valuesAtIndex(i: Int): ISet = Set(getType.getFieldType(i), for (Tuple(_, vs) <- xs) yield vs(i))  
   
-  def select(fields: Int*) = {
+  def select(fields: Int*): ISet = {
     val et = getFieldTypes.select(fields: _*)
     val ys = (for (x <- xs) yield x.asInstanceOf[ITuple] select(fields: _*))
 
-    new SetWriter(et, ys).done
+    SetOrRel(et, ys)
   }  
   
-  def selectByFieldNames(fields: String*) = this select ((for (s <- fields) yield (getFieldTypes getFieldIndex s)): _*) 
+  def selectByFieldNames(fields: String*): ISet = this select ((for (s <- fields) yield (getFieldTypes getFieldIndex s)): _*) 
 	
 }
 

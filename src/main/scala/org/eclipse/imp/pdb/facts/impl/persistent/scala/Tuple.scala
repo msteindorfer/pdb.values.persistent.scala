@@ -16,14 +16,11 @@ import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
-
 import collection.JavaConversions.asJavaIterator
 
 // TODO: fix odd invocation of tupleType and bug inside
-class Tuple(val xs: Tuple.Coll) extends Value with ITuple {
-    
-  override lazy val t = TypeFactory.getInstance tupleType (xs: _*)
-  
+class Tuple(val t: Type, val xs: Tuple.Coll) extends Value with ITuple {
+      
   def arity = xs.size
   
   def get(i: Int) = xs(i)
@@ -35,8 +32,9 @@ class Tuple(val xs: Tuple.Coll) extends Value with ITuple {
   def set(l: String, x: IValue): ITuple = this set (t getFieldIndex l, x)
   
   def select(fields: Int*) = { 
-    if (t.select(fields: _*).isTupleType)
-      Tuple((for (i <- fields) yield xs(i)): _*)
+    val resultType = t.select(fields: _*)
+    if (resultType.isTupleType)
+      Tuple(resultType, (for (i <- fields) yield xs(i)): _*)
     else
       get(fields(0)) // TODO: ensure that one element is present
   }
@@ -60,8 +58,10 @@ object Tuple {
   type Coll = collection.IndexedSeq[IValue]
   val empty = collection.immutable.Vector.empty[IValue]
   
-  def apply(xs: Coll): ITuple = new Tuple(xs)
-  def unapply(t: Tuple) = Some(t.xs)
+  def apply(tupleType: Type, xs: Coll): ITuple = new Tuple(tupleType, xs)
+  def apply(xs: Coll): ITuple = new Tuple(TypeFactory.getInstance tupleType (xs: _*), xs)
+  def unapply(tuple: Tuple) = Some(tuple.t, tuple.xs)
   
-  def apply(xs: IValue*): ITuple = new Tuple(empty ++ xs)
+  def apply(tupleType: Type, xs: IValue*): ITuple = new Tuple(tupleType, empty ++ xs)  
+  def apply(xs: IValue*): ITuple = new Tuple(TypeFactory.getInstance tupleType (xs: _*), empty ++ xs)
 }
