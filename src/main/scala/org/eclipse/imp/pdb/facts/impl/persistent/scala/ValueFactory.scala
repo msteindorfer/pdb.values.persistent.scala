@@ -28,20 +28,14 @@ import org.eclipse.imp.pdb.facts.IListRelation
 import org.eclipse.imp.pdb.facts.IValueFactory
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
-
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
+import org.eclipse.imp.pdb.facts.impl.fast.FastBaseValueFactory
 
-class ValueFactory extends BaseValueFactory {
+class ValueFactory extends FastBaseValueFactory {
   
-  def string(cps: Array[Int]) = {
-    this string cps.foldLeft(new java.lang.StringBuilder(cps length))((sb, cp) => sb.appendCodePoint(cp)).toString()
-  }
-
-  def string(cp: Int) = this string Array(cp)
-
   def tuple = Tuple()
 
   def tuple(xs: IValue*) = Tuple(xs: _*)
