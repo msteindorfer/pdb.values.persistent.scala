@@ -17,17 +17,14 @@ import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.`type`.TypeStore
-
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
+import org.eclipse.imp.pdb.facts.IList
 
-/*
- * NOTE: Due to inheritance the name receives a copy of <code>t getName</code> whereas it's a computable property.
- */
-case class Constructor(override val t: Type, override val children: collection.immutable.List[IValue], override val annotations: collection.immutable.Map[String, IValue])
-  extends Node(t, t getName, children, annotations) with IConstructor {
+case class Constructor(override val t: Type, val children: collection.immutable.List[IValue], val annotations: collection.immutable.Map[String, IValue])
+  extends Value with IConstructor {
     
   def this(t: Type) = this(t, collection.immutable.List.empty, collection.immutable.Map.empty)
   
@@ -76,21 +73,37 @@ case class Constructor(override val t: Type, override val children: collection.i
 
   override def hashCode = {
     val hashFormula = (h: Int, x: IValue) => (h << 1) ^ (h >> 1) ^ x.hashCode
-    children.foldLeft(name.hashCode)(hashFormula)
+    children.foldLeft(t.hashCode)(hashFormula)
   }
 
   override def equals(that: Any): Boolean = that match {
     case other: Constructor => {
-      (this.t comparable other.t) &&
+      (this.t == other.t) &&
         (this.children.length == other.children.length) &&
-        (this.name == other.name) &&
         (0 until children.length).forall(i => this.children(i) equals other.children(i))
     }
     case _ => false
-  }  
+  }
+  
+  
+  def get(i: Int) = children(i)
+
+  def arity = children length
+  
+  def getName = t getName
+ 
+  def getChildren = this
+
+  def iterator = children iterator
+
+  def getAnnotation(label: String) = annotations.getOrElse(label, null)
+
+  def hasAnnotation(label: String) = annotations contains label
+
+  def hasAnnotations = !(annotations isEmpty)
+
+  def getAnnotations = annotations
+
+  def replace(first: Int, second: Int, end: Int, repl: IList) = ???
   
 }
-
-//object Constructor {
-//  def apply(t: Type, children: collection.immutable.List[IValue], annotations: collection.immutable.Map[String, IValue]): Constructor = new Constructor(t, children, annotations)
-//}

@@ -22,7 +22,7 @@ import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
 import org.eclipse.imp.pdb.facts.IList
 
-class Node(override val t: Type, val name: String, val children: collection.immutable.List[IValue], val annotations: collection.immutable.Map[String, IValue])
+case class Node(override val t: Type, val name: String, val children: collection.immutable.List[IValue], val annotations: collection.immutable.Map[String, IValue])
   extends Value with INode {
 
   def this(name: String) = this(TypeFactory.getInstance nodeType, name, collection.immutable.List.empty, collection.immutable.Map.empty)
@@ -72,7 +72,7 @@ class Node(override val t: Type, val name: String, val children: collection.immu
 
   override def equals(that: Any): Boolean = that match {
     case other: Node => {
-      (this.t comparable other.t) &&
+      (this.t == other.t) &&
         (this.children.length == other.children.length) &&
         (this.name == other.name) &&
         (0 until children.length).forall(i => this.children(i) equals other.children(i))
@@ -80,8 +80,4 @@ class Node(override val t: Type, val name: String, val children: collection.immu
     case _ => false
   }
 
-}
-
-object Node {
-  def apply(t: Type, name: String, children: collection.immutable.List[IValue], annotations: collection.immutable.Map[String, IValue]): Node = new Node(t, name, children, annotations)
 }
