@@ -65,7 +65,7 @@ class Node(override val t: Type, val name: String, val children: collection.immu
   
   def accept[T](v: IValueVisitor[T]): T = v visitNode this
 
-  override lazy val hashCode = {
+  override def hashCode = {
     val hashFormula = (h: Int, x: IValue) => (h << 1) ^ (h >> 1) ^ x.hashCode
     children.foldLeft(name.hashCode)(hashFormula)
   }

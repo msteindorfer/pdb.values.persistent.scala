@@ -74,7 +74,7 @@ case class Constructor(override val t: Type, override val children: collection.i
   
   override def accept[T](v: IValueVisitor[T]): T = v visitConstructor this
 
-  override lazy val hashCode = {
+  override def hashCode = {
     val hashFormula = (h: Int, x: IValue) => (h << 1) ^ (h >> 1) ^ x.hashCode
     children.foldLeft(name.hashCode)(hashFormula)
   }
