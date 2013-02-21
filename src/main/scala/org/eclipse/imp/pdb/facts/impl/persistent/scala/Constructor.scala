@@ -23,34 +23,23 @@ import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
 import org.eclipse.imp.pdb.facts.IList
 
-case class Constructor(override val t: Type, val children: collection.immutable.List[IValue], val annotations: collection.immutable.Map[String, IValue])
-  extends Value with IConstructor {
+sealed trait Constructor extends Value with IConstructor {
     
-  def this(t: Type) = this(t, collection.immutable.List.empty, collection.immutable.Map.empty)
+  def name: String
   
-  def this(t: Type, children: collection.immutable.List[IValue]) = this(t, children, collection.immutable.Map.empty)
-
+  def children: Constructor.ChildrenColl
   
-  /*
-   * INode [Overrides]
-   */
-  override def set(i: Int, x: IValue) = Constructor(t, children updated (i, x), annotations)
+  def get(i: Int) = children(i)
 
-  override def setAnnotations(newAnnotations: java.util.Map[String, IValue]) = Constructor(t, children, collection.immutable.Map.empty ++ newAnnotations)
+  def arity = children.length
 
-  override def joinAnnotations(newAnnotations: java.util.Map[String, IValue]) = Constructor(t, children, annotations ++ newAnnotations)
+  def getName = name
 
-  override def setAnnotation(label: String, newValue: IValue) = Constructor(t, children, annotations + (label -> newValue)) 
+  def getChildren = this
+
+  def iterator = children.iterator
   
-  override def removeAnnotation(key: String) = Constructor(t, children, annotations - key) 
-
-  override def removeAnnotations = Constructor(t, children, collection.immutable.Map.empty)
-  
-  
-  /*
-   * ISet [Additions]
-   */
-  def getConstructorType = t
+  def accept[T](v: IValueVisitor[T]): T = v visitConstructor this
 
   /*
    * TODO: improve IConstructor.get(String) lookup time
@@ -62,48 +51,97 @@ case class Constructor(override val t: Type, val children: collection.immutable.
 
   def has(label: String) = getConstructorType hasField label
 
-  def getChildrenTypes = t getFieldTypes
+  def getChildrenTypes = t.getFieldTypes
 
   def declaresAnnotation(store: TypeStore, label: String) = store.getAnnotationType(getType, label) != null
 
   
-  override def getType = t getAbstractDataType
   
-  override def accept[T](v: IValueVisitor[T]): T = v visitConstructor this
-
-  override def hashCode = {
-    val hashFormula = (h: Int, x: IValue) => (h << 1) ^ (h >> 1) ^ x.hashCode
-    children.foldLeft(t.hashCode)(hashFormula)
-  }
-
-  override def equals(that: Any): Boolean = that match {
-    case other: Constructor => {
-      (this.t == other.t) &&
-        (this.children.length == other.children.length) &&
-        (0 until children.length).forall(i => this.children(i) equals other.children(i))
-    }
-    case _ => false
-  }
+  def replace(first: Int, second: Int, end: Int, repl: IList) = ???
   
+}
+
+object Constructor {
+
+  type ChildrenColl = collection.immutable.List[IValue]    
+  val emptyChildren = collection.immutable.List.empty[IValue]
   
-  def get(i: Int) = children(i)
+//  type ChildrenColl = scala.Array[IValue]    
+//  val emptyChildren = scala.Array.empty[IValue]
 
-  def arity = children length
+  type AnnotationsColl = collection.immutable.Map[String, IValue]
+  val emptyAnnotations = collection.immutable.Map.empty[String, IValue]  
   
-  def getName = t getName
- 
-  def getChildren = this
+  def apply(ct: Type) = SimpleConstructor(ct, emptyChildren)
 
-  def iterator = children iterator
+  def apply(ct: Type, children: ChildrenColl) = SimpleConstructor(ct, children)
+   
+  def apply(ct: Type, children: ChildrenColl, annotations: AnnotationsColl) = AnnotatedConstructor(ct, children, annotations)
+  
+}
 
+case class SimpleConstructor(val ct: Type, val children: Constructor.ChildrenColl)
+  extends Constructor {
+
+  def getConstructorType = ct
+  
+  override def t = ct.getAbstractDataType
+   
+  def set(i: Int, x: IValue) = SimpleConstructor(ct, children updated (i, x))
+
+  def setAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedConstructor(ct, children, Constructor.emptyAnnotations ++ newAnnotations)
+
+  def joinAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedConstructor(ct, children, Constructor.emptyAnnotations ++ newAnnotations)
+
+  def setAnnotation(label: String, newValue: IValue) = AnnotatedConstructor(ct, children, Constructor.emptyAnnotations + (label -> newValue)) 
+
+  def hasAnnotations = false 
+  
+  def hasAnnotation(label: String) = false
+
+  def getAnnotations = Constructor.emptyAnnotations  
+  
+  def getAnnotation(label: String) = null
+  
+  def removeAnnotation(key: String) = this 
+
+  def removeAnnotations = this
+   
+  def name = ct.getName
+    
+}
+
+case class AnnotatedConstructor(val ct: Type, val children: Constructor.ChildrenColl, val annotations: Constructor.AnnotationsColl)
+  extends Constructor {
+  
+  require (annotations.isEmpty == false)  
+
+  def getConstructorType = ct
+  
+  override def t = ct.getAbstractDataType 
+  
+  def set(i: Int, x: IValue) = AnnotatedConstructor(ct, children updated (i, x), annotations)
+    
+  override def setAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedConstructor(ct, children, Constructor.emptyAnnotations ++ newAnnotations)
+
+  override def joinAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedConstructor(ct, children, Constructor.emptyAnnotations ++ newAnnotations)
+
+  override def setAnnotation(label: String, newValue: IValue) = AnnotatedConstructor(ct, children, Constructor.emptyAnnotations + (label -> newValue))
+
+  def hasAnnotations = true
+
+  def hasAnnotation(label: String) = annotations contains label  
+  
+  def getAnnotations = annotations
+  
   def getAnnotation(label: String) = annotations.getOrElse(label, null)
 
-  def hasAnnotation(label: String) = annotations contains label
+  def removeAnnotations = SimpleConstructor(ct, children)  
 
-  def hasAnnotations = !(annotations isEmpty)
-
-  def getAnnotations = annotations
-
-  def replace(first: Int, second: Int, end: Int, repl: IList) = ???
+  def removeAnnotation(key: String) = (annotations - key) match {
+    case newAnnotations => if(newAnnotations.isEmpty) SimpleConstructor(ct, children) else AnnotatedConstructor(ct, children, newAnnotations)
+  }
+  
+  def name = ct.getName
   
 }
