@@ -43,11 +43,11 @@ class ValueFactory extends FastBaseValueFactory {
   // TODO: currently the type is ignored and recalculated inside the constructor
   def tuple(t: Type, xs: IValue*) = Tuple(xs: _*)
   
-  def node(name: String) = new Node(name)
+  def node(name: String) = Node(name)
 
-  def node(name: String, children: IValue*) = new Node(name, collection.immutable.List.empty ++ children)
+  def node(name: String, children: IValue*) = Node(name, Node.emptyChildren ++ children)
 
-  def node(name: String, annotations: java.util.Map[String, IValue], children: IValue*) = new Node(name, collection.immutable.Map.empty ++ annotations, collection.immutable.List.empty ++ children)
+  def node(name: String, annotations: java.util.Map[String, IValue], children: IValue*) = Node(name, Node.emptyAnnotations ++ annotations, Node.emptyChildren ++ children)
 
   def constructor(t: Type) = new Constructor(t)
 
