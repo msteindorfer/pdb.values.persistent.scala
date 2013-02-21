@@ -28,7 +28,7 @@ trait Value extends IValue {
   final override def toString: String = {
     val stream = new StringWriter
     new StandardTextWriter write (this, stream)
-    return stream toString
+    return stream.toString
   }
 
 }
