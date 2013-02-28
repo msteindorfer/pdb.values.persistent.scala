@@ -63,8 +63,8 @@ sealed trait Constructor extends Value with IConstructor {
 
 object Constructor {
 
-  type ChildrenColl = collection.immutable.List[IValue]    
-  val emptyChildren = collection.immutable.List.empty[IValue]
+  type ChildrenColl = collection.immutable.Vector[IValue]    
+  val emptyChildren = collection.immutable.Vector.empty[IValue]
   
 //  type ChildrenColl = scala.Array[IValue]    
 //  val emptyChildren = scala.Array.empty[IValue]

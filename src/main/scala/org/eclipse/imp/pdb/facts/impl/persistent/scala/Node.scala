@@ -48,8 +48,11 @@ sealed trait Node extends INode {
 
 object Node {
 
-  type ChildrenColl = collection.immutable.List[IValue]    
-  val emptyChildren = collection.immutable.List.empty[IValue]
+  type ChildrenColl = collection.immutable.Vector[IValue]    
+  val emptyChildren = collection.immutable.Vector.empty[IValue]
+  
+//  type ChildrenColl = scala.Array[IValue]    
+//  val emptyChildren = scala.Array.empty[IValue]
 
   type AnnotationsColl = collection.immutable.Map[String, IValue]
   val emptyAnnotations = collection.immutable.Map.empty[String, IValue]  

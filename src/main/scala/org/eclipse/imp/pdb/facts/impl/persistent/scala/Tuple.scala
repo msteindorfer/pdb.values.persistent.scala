@@ -55,13 +55,22 @@ class Tuple(val t: Type, val xs: Tuple.Coll) extends Value with ITuple {
 }
 
 object Tuple {  
-  type Coll = collection.IndexedSeq[IValue]
+  type Coll = collection.immutable.Vector[IValue]
   val empty = collection.immutable.Vector.empty[IValue]
+
+//  type Coll = scala.Array[IValue]    
+//  val empty = scala.Array.empty[IValue]
   
   def apply(tupleType: Type, xs: Coll): ITuple = new Tuple(tupleType, xs)
   def apply(xs: Coll): ITuple = new Tuple(TypeFactory.getInstance tupleType (xs: _*), xs)
-  def unapply(tuple: Tuple) = Some(tuple.t, tuple.xs)
-  
+//  def unapply(tuple: Tuple) = Some(tuple.xs)
+
+  def unapplySeq(tuple: Tuple): Option[Seq[IValue]] = Some(tuple.xs)
+ 
   def apply(tupleType: Type, xs: IValue*): ITuple = new Tuple(tupleType, empty ++ xs)  
   def apply(xs: IValue*): ITuple = new Tuple(TypeFactory.getInstance tupleType (xs: _*), empty ++ xs)
 }
+
+//object tupleSeq {
+//  def unapplySeq(tuple: Tuple): Option[Seq[IValue]] = Some(tuple.xs)
+//}

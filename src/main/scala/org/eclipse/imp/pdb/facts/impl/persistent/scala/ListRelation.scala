@@ -33,6 +33,9 @@ case class ListRelation(override val et: Type, override val xs: List.Coll) exten
 
   override lazy val t = TypeFactory.getInstance lrelTypeFromTuple et  
   
+  // alias for type casting
+  def ts = xs.asInstanceOf[collection.LinearSeq[Tuple]]  
+  
   override def accept[T](v: IValueVisitor[T]): T = v visitListRelation this  
   
   /*
@@ -84,7 +87,7 @@ case class ListRelation(override val et: Type, override val xs: List.Coll) exten
   
   def range = valuesAtIndex(getType.getArity - 1)
 
-  def valuesAtIndex(i: Int): IList = List(getType.getFieldType(i), for (Tuple(_, vs) <- xs) yield vs(i))  
+  def valuesAtIndex(i: Int): IList = List(getType.getFieldType(i), for (t <- ts) yield t.get(i))  
   
   def select(fields: Int*): IList = {
     val et = getFieldTypes.select(fields: _*)

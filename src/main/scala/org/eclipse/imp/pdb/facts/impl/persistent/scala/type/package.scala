@@ -14,12 +14,13 @@ package org.eclipse.imp.pdb.facts.impl.persistent.scala
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
+import scala.collection.GenTraversable
 
 package object `type` {
 
   // NOTE: nice example of how to shorten code
-  def lub(xs: Traversable[IValue]): Type = {
-    xs.foldLeft(TypeFactory.getInstance voidType)((t, x) => t lub x.getType)
+  def lub(xs: GenTraversable[IValue]): Type = {
+    xs.foldLeft(TypeFactory.getInstance.voidType)((t, x) => t lub x.getType)
   }
-  
+    
 }

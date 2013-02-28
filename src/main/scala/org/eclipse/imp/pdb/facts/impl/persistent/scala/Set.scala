@@ -30,7 +30,7 @@ class Set(val et: Type, val xs: Set.Coll)
   protected def lub(e: IValue) = et lub e.getType
   protected def lub(e: ISet) = et lub e.getElementType
 
-  override lazy val t = TypeFactory.getInstance setType et
+  override val t = TypeFactory.getInstance setType et
   
   def getElementType = et
 
@@ -99,7 +99,7 @@ class Set(val et: Type, val xs: Set.Coll)
 }
 
 object Set {
-  type Coll = collection.Set[IValue]
+  type Coll = collection.immutable.Set[IValue]
   val empty = collection.immutable.Set.empty[IValue]
   
   def apply(et: Type, xs: Coll): ISet = new Set(et, xs)
