@@ -24,7 +24,7 @@ class ListRelationWriter(et: Type)
 
   require (et isTupleType)
   
-  override def done: IListRelation = ListOrRel(et, Nil ++ xs)
+  override def done: IListRelation = ListOrRel(et, List.empty ++ xs.result)
   
 }
 
@@ -33,7 +33,7 @@ sealed class ListRelationWriterWithTypeInference()
   with IListRelationWriter {
   
   override def done: IListRelation = {
-    val zs = Nil ++ xs ;
+    val zs = List.empty ++ xs.result ;
     ListOrRel(`type` lub zs, zs)
   }  
   

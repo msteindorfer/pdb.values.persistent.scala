@@ -52,7 +52,7 @@ class ListWriter(t: Type) extends IListWriter {
 
   def size = xs size
   
-  def done: IList = ListOrRel(t, List.empty ++ xs)
+  def done: IList = ListOrRel(t, List.empty ++ xs.result)
 
 }
 
