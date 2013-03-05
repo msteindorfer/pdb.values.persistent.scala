@@ -27,15 +27,13 @@ import collection.immutable.List.empty
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 import scala.annotation.tailrec
+import scala.collection.breakOut
 import org.eclipse.imp.pdb.facts.ITuple
 
 case class ListRelation(override val et: Type, override val xs: List.Coll) extends List(et, xs) with IListRelation {
 
   override lazy val t = TypeFactory.getInstance lrelTypeFromTuple et  
-  
-  // alias for type casting
-  def ts = xs.asInstanceOf[collection.LinearSeq[Tuple]]  
-  
+    
   override def accept[T](v: IValueVisitor[T]): T = v visitListRelation this  
   
   /*
@@ -45,15 +43,18 @@ case class ListRelation(override val et: Type, override val xs: List.Coll) exten
   
   def compose(other: IListRelation): IListRelation = other match {
     case that: ListRelation => {
-      val resultType = getType compose that.getType
+      val relationType = getType compose that.getType
+      val tupleType = TypeFactory.getInstance.tupleType(this.et.getFieldType(0), that.et.getFieldType(1)) 
+
       val otherIndexed = that.xs groupBy { _.asInstanceOf[ITuple].get(0) }
 
-      val tuples = for {
-        xy <- this.xs.asInstanceOf[collection.immutable.List[ITuple]];
-        yz <- otherIndexed.getOrElse(xy.get(1), empty).asInstanceOf[collection.immutable.List[ITuple]]
-      } yield Tuple(xy.get(0), yz.get(1))
+      val tuples: List.Coll = xs.flatMap { t1 =>
+        otherIndexed.getOrElse(t1.asInstanceOf[ITuple].get(1), List.empty).map { t2 =>
+          Tuple(tupleType, t1.asInstanceOf[ITuple].get(0), t2.asInstanceOf[ITuple].get(1)): IValue
+        }(breakOut)
+      }
 
-      ListRelation(resultType getFieldTypes, tuples)
+      ListRelation(relationType.getFieldTypes, tuples)
     }
   }
 
@@ -87,7 +88,7 @@ case class ListRelation(override val et: Type, override val xs: List.Coll) exten
   
   def range = valuesAtIndex(getType.getArity - 1)
 
-  def valuesAtIndex(i: Int): IList = List(getType.getFieldType(i), for (t <- ts) yield t.get(i))  
+  def valuesAtIndex(i: Int): IList = List(getType.getFieldType(i), for (x <- xs) yield x.asInstanceOf[ITuple].get(i))  
   
   def select(fields: Int*): IList = {
     val et = getFieldTypes.select(fields: _*)
