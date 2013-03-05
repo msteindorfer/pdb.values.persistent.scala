@@ -35,8 +35,7 @@ class List(val et: Type, val xs: List.Coll)
   
   def getElementType = et
 
-  // caching length because of O(n) cost 
-  lazy val length = xs.length
+  def length = xs.length
 
   def reverse[ListOrRel <: IList](): ListOrRel = ListOrRel(et, xs.reverse)
 
@@ -45,7 +44,7 @@ class List(val et: Type, val xs: List.Coll)
   def insert[ListOrRel <: IList](x: IValue): ListOrRel = ListOrRel(this lub x, x +: xs)
 
   def concat[ListOrRel <: IList](other: IList): ListOrRel = other match {
-    case List(_, ys) => ListOrRel(this lub other, xs ++: ys)
+    case List(_, ys) => ListOrRel(this lub other, xs ++ ys)
   }
 
   def put[ListOrRel <: IList](i: Int, x: IValue): ListOrRel = ListOrRel(this lub x, xs updated (i, x))
@@ -59,18 +58,18 @@ class List(val et: Type, val xs: List.Coll)
 
   def isEmpty = xs.isEmpty
 
-  def contains(e: IValue) = xs contains e
+  def contains(e: IValue) = xs exists (_ == e)
 
   def delete[ListOrRel <: IList](x: IValue): ListOrRel = xs indexOf x match {
     case i => if (i == -1) this.asInstanceOf[ListOrRel] else delete(i)
   }
 
-  def delete[ListOrRel <: IList](i: Int): ListOrRel = ListOrRel(et, (xs take i) ++: (xs drop i + 1))
+  def delete[ListOrRel <: IList](i: Int): ListOrRel = ListOrRel(et, (xs take i) ++ (xs drop i + 1))
 
   def intersect[ListOrRel <: IList](other: IList): ListOrRel = other match {
     case List(ot, ys) => {
       val rt = et lub ot
-      val rv = for (x <- xs if ys contains x) yield x
+      val rv = for (x <- xs if ys exists (_ == x)) yield x // xs intersect ys ??
 
       ListOrRel(rt, rv)
     }
@@ -103,7 +102,7 @@ class List(val et: Type, val xs: List.Coll)
   def accept[T](v: IValueVisitor[T]): T = v visitList this 
   
   override def equals(that: Any): Boolean = that match {
-    case other: List => (this.xs equals other.xs)
+    case other: List => if (this.xs eq other.xs) true else (this.xs equals other.xs)
     case _ => false
   }
 
@@ -112,8 +111,11 @@ class List(val et: Type, val xs: List.Coll)
 }
 
 object List {
-  type Coll = collection.LinearSeq[IValue]
-  val empty = collection.immutable.List.empty[IValue]
+  type Coll = collection.immutable.Vector[IValue]
+  val empty = collection.immutable.Vector.empty[IValue]
+
+//  type Coll = scala.Array[IValue]
+//  val empty = scala.Array.empty[IValue]
   
   def apply(et: Type, xs: List.Coll): List = new List(et, xs)
   def unapply(l: List) = Some(l.et, l.xs)
