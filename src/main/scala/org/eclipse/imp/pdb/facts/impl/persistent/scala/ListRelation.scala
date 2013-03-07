@@ -30,8 +30,8 @@ import scala.annotation.tailrec
 import scala.collection.breakOut
 import org.eclipse.imp.pdb.facts.ITuple
 
-case class ListRelation(override val et: Type, override val xs: List.Coll) extends List(et, xs) with IListRelation {
-
+case class ListRelation(override val et: Type, override val xs: ListColl) extends List(et, xs) with IListRelation {
+  
   override lazy val t = TypeFactory.getInstance lrelTypeFromTuple et  
     
   override def accept[T](v: IValueVisitor[T]): T = v visitListRelation this  
@@ -48,8 +48,8 @@ case class ListRelation(override val et: Type, override val xs: List.Coll) exten
 
       val otherIndexed = that.xs groupBy { _.asInstanceOf[ITuple].get(0) }
 
-      val tuples: List.Coll = xs.flatMap { t1 =>
-        otherIndexed.getOrElse(t1.asInstanceOf[ITuple].get(1), List.empty).map { t2 =>
+      val tuples: ListColl = xs.flatMap { t1 =>
+        otherIndexed.getOrElse(t1.asInstanceOf[ITuple].get(1), emptyList).map { t2 =>
           Tuple(tupleType, t1.asInstanceOf[ITuple].get(0), t2.asInstanceOf[ITuple].get(1)): IValue
         }(breakOut)
       }
@@ -70,7 +70,7 @@ case class ListRelation(override val et: Type, override val xs: List.Coll) exten
   
   def closureStar: IListRelation = {
     val resultElementType = getType.closure getElementType
-    val reflex = ListRelation(resultElementType, List.empty ++ (for (x <- carrier) yield Tuple(resultElementType, x, x)))
+    val reflex = ListRelation(resultElementType, emptyList ++ (for (x <- carrier) yield Tuple(resultElementType, x, x)))
 
     closure concat reflex
   }

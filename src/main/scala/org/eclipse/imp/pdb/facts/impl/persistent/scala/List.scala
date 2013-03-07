@@ -25,9 +25,9 @@ import org.eclipse.imp.pdb.facts.visitors.VisitorException
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 
-class List(val et: Type, val xs: List.Coll)
-  extends Value with IList {
-
+class List(val et: Type, val xs: ListColl)
+  extends Value with IList {  
+  
   private def lub(e: IValue) = et lub e.getType
   private def lub(e: IList) = et lub e.getElementType
 
@@ -111,12 +111,6 @@ class List(val et: Type, val xs: List.Coll)
 }
 
 object List {
-  type Coll = collection.immutable.Vector[IValue]
-  val empty = collection.immutable.Vector.empty[IValue]
-
-//  type Coll = scala.Array[IValue]
-//  val empty = scala.Array.empty[IValue]
-  
-  def apply(et: Type, xs: List.Coll): List = new List(et, xs)
+  def apply(et: Type, xs: ListColl): List = new List(et, xs)
   def unapply(l: List) = Some(l.et, l.xs)
 }

@@ -25,7 +25,7 @@ import collection.mutable.ListBuffer
 import collection.JavaConversions.iterableAsScalaIterable
 
 class ListWriter(t: Type) extends IListWriter {
-
+  
   val xs = ListBuffer[IValue]()
 
   def insert(ys: IValue*): Unit = ys ++=: xs
@@ -52,14 +52,14 @@ class ListWriter(t: Type) extends IListWriter {
 
   def size = xs size
   
-  def done: IList = ListOrRel(t, List.empty ++ xs.result)
+  def done: IList = ListOrRel(t, emptyList ++ xs.result)
 
 }
 
 sealed class ListWriterWithTypeInference() extends ListWriter(TypeFactory.getInstance voidType) {
 
   override def done: IList = {
-    val zs = List.empty ++ xs;
+    val zs = emptyList ++ xs;
     ListOrRel(`type` lub zs, zs)
   }
   
