@@ -102,7 +102,12 @@ class List(val et: Type, val xs: ListColl)
   def accept[T](v: IValueVisitor[T]): T = v visitList this 
   
   override def equals(that: Any): Boolean = that match {
-    case other: List => if (this.xs eq other.xs) true else (this.xs equals other.xs)
+    case other: List => 
+      if (this.xs eq other.xs) true 
+      else {
+        if (this.length == other.length) (this.xs equals other.xs)
+        else false
+      }
     case _ => false
   }
 
