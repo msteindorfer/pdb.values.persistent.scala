@@ -38,7 +38,7 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
 
   def containsKey(k: IValue) = xs contains k
 
-  def containsValue(v: IValue) = xs exists { case (_, v) => true }
+  def containsValue(v: IValue) = xs exists { case (_, cv) => v == cv }
 
   def getKeyType = kt
 
