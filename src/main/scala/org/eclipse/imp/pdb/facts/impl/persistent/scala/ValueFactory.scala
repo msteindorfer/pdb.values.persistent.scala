@@ -34,6 +34,8 @@ import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
 import org.eclipse.imp.pdb.facts.impl.fast.FastBaseValueFactory
 
+import EnhancedValue._
+
 class ValueFactory extends FastBaseValueFactory {
   
   def tuple = Tuple()
