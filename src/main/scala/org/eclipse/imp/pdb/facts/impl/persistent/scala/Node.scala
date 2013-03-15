@@ -44,6 +44,16 @@ sealed trait Node extends INode {
   
   def replace(first: Int, second: Int, end: Int, repl: IList) = ???
   
+  def hasKeywordArguments: Boolean = ???
+  
+  def getKeywordArgumentNames: Array[String] = ???
+
+  def getKeywordIndex(name: String): Int = ???
+
+  def getKeywordArgumentValue(name: String): IValue = ???
+
+  def positionalArity: Int = ???
+  
 }
 
 object Node {
