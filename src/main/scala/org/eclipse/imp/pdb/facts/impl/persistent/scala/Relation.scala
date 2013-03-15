@@ -29,10 +29,7 @@ case class Relation(override val et: Type, override val xs: Set.Coll)
   extends Set(et, xs) with IRelation {
  
   override val t = TypeFactory.getInstance relTypeFromTuple et  
-  
-  // alias for type casting
-  val ts = xs.asInstanceOf[collection.immutable.Set[Tuple]]
-  
+   
   override def accept[T](v: IValueVisitor[T]): T = v visitRelation this
   
   def arity = et.getArity
@@ -77,7 +74,7 @@ case class Relation(override val et: Type, override val xs: Set.Coll)
 
   def carrier: ISet = {
     val newElementType = getType.carrier.getElementType
-    val newElementData = ts flatMap { _.xs }
+    val newElementData = xs flatMap { _.asInstanceOf[Tuple].xs }
       
     Set(newElementType, newElementData)
   }
@@ -88,11 +85,11 @@ case class Relation(override val et: Type, override val xs: Set.Coll)
   
   def range = valuesAtIndex(getType.getArity - 1)
 
-  def valuesAtIndex(i: Int): ISet = Set(getType.getFieldType(i), for (t <- ts) yield t.get(i))  
+  def valuesAtIndex(i: Int): ISet = Set(getType.getFieldType(i), for (x <- xs) yield t.asInstanceOf[Tuple].get(i))  
   
   def select(fields: Int*): ISet = {
     val et = getFieldTypes.select(fields: _*)
-    val ys = (for (t <- ts) yield t select(fields: _*))
+    val ys = (for (x <- xs) yield x.asInstanceOf[Tuple] select(fields: _*))
 
     SetOrRel(et, ys)
   }  
