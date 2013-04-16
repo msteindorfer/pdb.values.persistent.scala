@@ -23,7 +23,6 @@ import org.eclipse.imp.pdb.facts.IList
 import org.eclipse.imp.pdb.facts.IMap
 import org.eclipse.imp.pdb.facts.IMapWriter
 import org.eclipse.imp.pdb.facts.INode
-import org.eclipse.imp.pdb.facts.IRelation
 import org.eclipse.imp.pdb.facts.IListRelation
 import org.eclipse.imp.pdb.facts.IValueFactory
 import org.eclipse.imp.pdb.facts.`type`.Type
@@ -81,10 +80,10 @@ class ValueFactory extends FastBaseValueFactory {
 
   def listWriter(t: Type) = new ListWriter(t)
 
-  def relation(t: Type) = setWriter(t).done.asInstanceOf[IRelation]
+  def relation(t: Type) = setWriter(t).done
 
   // TODO: add tests, not yet covered
-  def relation(xs: IValue*) = set(xs: _*).asInstanceOf[IRelation]
+  def relation(xs: IValue*) = set(xs: _*)
     
   def relationWriter(t: Type) = new RelationWriter(t)
 
@@ -103,7 +102,7 @@ class ValueFactory extends FastBaseValueFactory {
   def listRelation(t: Type) = listRelationWriter(t).done
     
   // TODO: add tests, not yet covered
-  def listRelation(xs: IValue*) = list(xs: _*).asInstanceOf[IListRelation]
+  def listRelation(xs: IValue*) = list(xs: _*)
   
   def listRelationWriter(t: Type) = new ListRelationWriter(t)
   

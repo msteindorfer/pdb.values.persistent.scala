@@ -26,7 +26,7 @@ class SetWriter(et: Type, var xs: Set.Coll) extends ISetWriter {
 
   def size = xs.size
   
-  def done: ISet = SetOrRel(et, xs)
+  def done: ISet = Set(et, xs)
   
   def insert(ys: IValue*) { xs = xs ++ ys }       
       
@@ -38,6 +38,6 @@ class SetWriter(et: Type, var xs: Set.Coll) extends ISetWriter {
 
 sealed class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
    
-  override def done: ISet = SetOrRel(`type` lub xs, xs)
+  override def done: ISet = Set(`type` lub xs, xs)
   
 }

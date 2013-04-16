@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
-import org.eclipse.imp.pdb.facts.IRelationWriter
-import org.eclipse.imp.pdb.facts.IRelation
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.ISet
 import org.eclipse.imp.pdb.facts.ITuple
@@ -22,19 +20,17 @@ import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import collection.JavaConversions.iterableAsScalaIterable
 
 class RelationWriter(et: Type)
-  extends SetWriter(et) 
-  with IRelationWriter {
+  extends SetWriter(et) {
 
   require (et isTupleType)
   
-  override def done: IRelation = SetOrRel(et, xs)
+  override def done = Set(et, xs)
 
 }
 
 sealed class RelationWriterWithTypeInference() 
-  extends RelationWriter(TypeFactory.getInstance voidType)
-  with IRelationWriter {
+  extends RelationWriter(TypeFactory.getInstance voidType) {
   
-  override def done: IRelation = SetOrRel(`type` lub xs, xs)
+  override def done = Set(`type` lub xs, xs)
   
 }

@@ -14,7 +14,6 @@ package org.eclipse.imp.pdb.facts.impl.persistent.scala
 import org.eclipse.imp.pdb.facts.ISet
 import org.eclipse.imp.pdb.facts.ISetWriter
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.IRelation
 import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
 import org.eclipse.imp.pdb.facts.exceptions.UnexpectedElementTypeException
 import org.eclipse.imp.pdb.facts.`type`.Type
@@ -26,11 +25,18 @@ import collection.JavaConversions.iterableAsScalaIterable
 
 class Set(val et: Type, val xs: Set.Coll)
   extends Value with ISet {
+
+  require(if (xs.isEmpty) et.isVoidType() else true)
   
   protected def lub(e: IValue) = et lub e.getType
   protected def lub(e: ISet) = et lub e.getElementType
 
-  override val t = TypeFactory.getInstance setType et
+  override val t = {
+    if (et isTupleType)
+      TypeFactory.getInstance relTypeFromTuple et
+    else
+      TypeFactory.getInstance setType et
+  }
   
   def getElementType = et
 
@@ -40,44 +46,44 @@ class Set(val et: Type, val xs: Set.Coll)
 
   def contains(x: IValue) = xs contains x
 
-  def insert[SetOrRel <: ISet](x: IValue): SetOrRel = SetOrRel(this lub x, xs + x)
+  def insert(x: IValue): ISet = Set(this lub x, xs + x)
 
-  def delete[SetOrRel <: ISet](x: IValue): SetOrRel = SetOrRel(this lub x, xs - x)
+  def delete(x: IValue): ISet = Set(this lub x, xs - x)
   
   // TODO: higher order function with operation as parameter
-  def union[SetOrRel <: ISet](other: ISet): SetOrRel = other match {
+  def union(other: ISet): ISet = other match {
     case Set(ot, ys) => {
       val rt = et lub ot
       val rv = xs | ys
 
-      SetOrRel(rt, rv)
+      Set(rt, rv)
     }
   }
 
   // TODO: higher order function with operation as parameter
-  def intersect[SetOrRel <: ISet](other: ISet): SetOrRel = other match {
+  def intersect(other: ISet): ISet = other match {
     case Set(ot, ys) => {
       val rt = et lub ot
       val rv = xs & ys
 
-      SetOrRel(rt, rv)
+      Set(rt, rv)
     }
   }
   
   // TODO: higher order function with operation as parameter  
-  def subtract[SetOrRel <: ISet](other: ISet): SetOrRel = other match {
+  def subtract(other: ISet): ISet = other match {
     case Set(ot, ys) => {
       val rt = et // type is different from union and intersect
       val rv = xs &~ ys
 
-      SetOrRel(rt, rv)
+      Set(rt, rv)
     }
   }
   
-  def product(other: ISet): IRelation = other match {
+  def product(other: ISet): ISet = other match {
     case Set(ot, ys) => {
       val tupleType = TypeFactory.getInstance tupleType (et, ot)
-      Relation(tupleType, for (x <- xs; y <- ys) yield Tuple(tupleType, x, y))
+      Set(tupleType, for (x <- xs; y <- ys) yield Tuple(tupleType, x, y))
     }
   }
 
@@ -87,7 +93,12 @@ class Set(val et: Type, val xs: Set.Coll)
 
   def iterator = xs.iterator
 
-  def accept[T](v: IValueVisitor[T]): T = v visitSet this
+  def accept[T](v: IValueVisitor[T]): T = {
+    if (et isTupleType)
+      v visitRelation this
+    else
+      v visitSet this
+  }
 
   override def equals(other: Any): Boolean = other match {
     case that: Set => (this.xs equals that.xs)
@@ -96,12 +107,21 @@ class Set(val et: Type, val xs: Set.Coll)
 
   override lazy val hashCode = xs.hashCode
   
+  def isRelation = getType.isRelationType
+  
+  def asRelation = {
+    import ImplicitRelationViewOnSet._
+    this
+  }
+  
 }
 
 object Set {
   type Coll = collection.immutable.Set[IValue]
   val empty = collection.immutable.Set.empty[IValue]
+
+  def apply(et: Type, xs: Coll): ISet = 
+    new Set(if (xs isEmpty) TypeFactory.getInstance voidType else et, xs)
   
-  def apply(et: Type, xs: Coll): ISet = new Set(et, xs)
   def unapply(s: Set) = Some(s.et, s.xs)
 }

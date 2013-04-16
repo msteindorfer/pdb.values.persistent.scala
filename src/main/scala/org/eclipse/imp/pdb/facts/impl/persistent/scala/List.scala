@@ -12,7 +12,6 @@
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.IList
-import org.eclipse.imp.pdb.facts.IListRelation
 import org.eclipse.imp.pdb.facts.IListWriter
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
@@ -28,61 +27,70 @@ import collection.JavaConversions.iterableAsScalaIterable
 class List(val et: Type, val xs: ListColl)
   extends Value with IList {  
   
+  require(if (xs.isEmpty) et.isVoidType() else true)  
+  
   private def lub(e: IValue) = et lub e.getType
   private def lub(e: IList) = et lub e.getElementType
 
-  override lazy val t = TypeFactory.getInstance listType et  
+  override val t = {
+    val elementType = if (xs isEmpty) TypeFactory.getInstance voidType else et
+
+    if (elementType isTupleType)
+      TypeFactory.getInstance lrelTypeFromTuple elementType
+    else
+      TypeFactory.getInstance listType elementType
+  }
   
   def getElementType = et
 
   def length = xs.length
 
-  def reverse[ListOrRel <: IList](): ListOrRel = ListOrRel(et, xs.reverse)
+  def reverse(): IList = List(et, xs.reverse)
 
-  def append[ListOrRel <: IList](x: IValue): ListOrRel = ListOrRel(this lub x, xs :+ x)
+  def append(x: IValue): IList = List(this lub x, xs :+ x)
 
-  def insert[ListOrRel <: IList](x: IValue): ListOrRel = ListOrRel(this lub x, x +: xs)
+  def insert(x: IValue): IList = List(this lub x, x +: xs)
 
-  def concat[ListOrRel <: IList](other: IList): ListOrRel = other match {
-    case List(_, ys) => ListOrRel(this lub other, xs ++ ys)
+  def concat(other: IList): IList = other match {
+    case List(_, ys) => List(this lub other, xs ++ ys)
   }
 
-  def put[ListOrRel <: IList](i: Int, x: IValue): ListOrRel = ListOrRel(this lub x, xs updated (i, x))
+  def put(i: Int, x: IValue): IList = List(this lub x, xs updated (i, x))
 
   def get(i: Int) = xs(i)
 
-  def sublist[ListOrRel <: IList](i: Int, n: Int): ListOrRel = { 
+  def sublist(i: Int, n: Int): IList = { 
     if (i < 0 || n < 0 || i + n > length) { throw new IndexOutOfBoundsException() } /* for compatibility with Rascal test suite */
-    ListOrRel(et, xs slice (i, i + n))
+    List(et, xs slice (i, i + n))
   }
 
   def isEmpty = xs.isEmpty
 
   def contains(e: IValue) = xs exists (_ == e)
 
-  def delete[ListOrRel <: IList](x: IValue): ListOrRel = xs indexOf x match {
-    case i => if (i == -1) this.asInstanceOf[ListOrRel] else delete(i)
+  def delete(x: IValue): IList = xs indexOf x match {
+    case i => if (i == -1) this.asInstanceOf[IList] else delete(i)
   }
 
-  def delete[ListOrRel <: IList](i: Int): ListOrRel = ListOrRel(et, (xs take i) ++ (xs drop i + 1))
+  def delete(i: Int): IList = List(et, (xs take i) ++ (xs drop i + 1))
 
-  def intersect[ListOrRel <: IList](other: IList): ListOrRel = other match {
+  def intersect(other: IList): IList = other match {
     case List(ot, ys) => {
       val rt = et lub ot
-      val rv = for (x <- xs if ys exists (_ == x)) yield x // xs intersect ys ??
+      val rv = for (x <- xs if ys exists (_ isEqual x)) yield x // xs intersect ys ??
 
-      ListOrRel(rt, rv)
+      List(rt, rv)
     }
-  }
+  } 
   
-  def subtract[ListOrRel <: IList](other: IList): ListOrRel = other match {
-    case List(ot, ys) => ListOrRel(ot, xs diff ys)
+  def subtract(other: IList): IList = other match {
+    case List(ot, ys) => List(ot, xs diff ys)
   }
 
-  def product(other: IList): IListRelation = other match {
+  def product(other: IList): IList = other match {
     case List(ot, ys) => {
       val productType = TypeFactory.getInstance tupleType (et, ot)
-      ListOrRel(productType, (for (x <- xs; y <- ys) yield Tuple(x, y)))
+      List(productType, (for (x <- xs; y <- ys) yield Tuple(x, y)))
     }
   }
 
@@ -95,11 +103,16 @@ class List(val et: Type, val xs: ListColl)
     }
   }
     
-  def replace[ListOrRel <: IList](first: Int, second: Int, end: Int, repl: IList): ListOrRel = ???  
+  def replace(first: Int, second: Int, end: Int, repl: IList): IList = ???  
   
   def iterator = xs.iterator
 
-  def accept[T](v: IValueVisitor[T]): T = v visitList this 
+  def accept[T](v: IValueVisitor[T]): T = {
+    if (et isTupleType)
+      v visitListRelation this
+    else
+      v visitList this
+  }
   
   override def equals(that: Any): Boolean = that match {
     case other: List => 
@@ -113,9 +126,18 @@ class List(val et: Type, val xs: ListColl)
 
   override lazy val hashCode = xs.hashCode
 
+  def isRelation = getType.isRelationType
+  
+  def asRelation = {
+    import ImplicitRelationViewOnList._
+    this
+  }
+  
 }
 
 object List {
-  def apply(et: Type, xs: ListColl): List = new List(et, xs)
+  def apply(et: Type, xs: ListColl): List = 
+    new List(if (xs isEmpty) TypeFactory.getInstance voidType else et, xs)
+  
   def unapply(l: List) = Some(l.et, l.xs)
 }
