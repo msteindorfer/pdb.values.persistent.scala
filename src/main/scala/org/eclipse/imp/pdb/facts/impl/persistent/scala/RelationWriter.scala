@@ -22,7 +22,7 @@ import collection.JavaConversions.iterableAsScalaIterable
 class RelationWriter(et: Type)
   extends SetWriter(et) {
 
-  require (et isTupleType)
+  require (et isTuple)
   
   override def done = Set(et, xs)
 

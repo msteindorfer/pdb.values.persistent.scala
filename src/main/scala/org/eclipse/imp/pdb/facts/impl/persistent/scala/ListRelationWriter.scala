@@ -20,7 +20,7 @@ import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 class ListRelationWriter(et: Type)
   extends ListWriter(et) {
 
-  require (et isTupleType)
+  require (et isTuple)
   
   override def done = List(et, emptyList ++ xs.result)
   

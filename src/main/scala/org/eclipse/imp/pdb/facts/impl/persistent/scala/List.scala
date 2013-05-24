@@ -27,7 +27,7 @@ import collection.JavaConversions.iterableAsScalaIterable
 class List(val et: Type, val xs: ListColl)
   extends Value with IList {  
   
-  require(if (xs.isEmpty) et.isVoidType() else true)  
+  require(if (xs.isEmpty) et.isBottom else true)  
   
   private def lub(e: IValue) = et lub e.getType
   private def lub(e: IList) = et lub e.getElementType
@@ -35,7 +35,7 @@ class List(val et: Type, val xs: ListColl)
   override val t = {
     val elementType = if (xs isEmpty) TypeFactory.getInstance voidType else et
 
-    if (elementType isTupleType)
+    if (elementType isTuple)
       TypeFactory.getInstance lrelTypeFromTuple elementType
     else
       TypeFactory.getInstance listType elementType
@@ -107,8 +107,8 @@ class List(val et: Type, val xs: ListColl)
   
   def iterator = xs.iterator
 
-  def accept[T](v: IValueVisitor[T]): T = {
-    if (et isTupleType)
+  def accept[T,E <: Throwable](v: IValueVisitor[T,E]): T = {
+    if (et isTuple)
       v visitListRelation this
     else
       v visitList this
@@ -126,7 +126,7 @@ class List(val et: Type, val xs: ListColl)
 
   override lazy val hashCode = xs.hashCode
 
-  def isRelation = getType.isRelationType
+  def isRelation = getType.isRelation
   
   def asRelation = {
     import ImplicitRelationViewOnList._

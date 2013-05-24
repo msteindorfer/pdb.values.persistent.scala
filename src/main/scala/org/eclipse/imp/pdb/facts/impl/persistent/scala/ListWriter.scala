@@ -44,12 +44,6 @@ class ListWriter(t: Type) extends IListWriter {
 
   def appendAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs appendAll ys
 
-  def delete(x: IValue) = xs indexOf x match {
-    case i => if (i == -1) this else delete(i)
-  }
-
-  def delete(i: Int) = xs remove i
-
   def size = xs size
   
   def done: IList = List(t, emptyList ++ xs.result)

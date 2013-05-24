@@ -7,7 +7,7 @@ import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 abstract sealed class BoolValue extends Value with IBool {
   
   override def t = TypeFactory.getInstance boolType
-  def accept[T](v: IValueVisitor[T]): T = v visitBoolean this
+  def accept[T,E <: Throwable](v: IValueVisitor[T,E]): T = v visitBoolean this
   
   def getStringRepresentation: String = toString
   def equivalent(other: IBool): IBool = if (this eq other) TrueValue else FalseValue

@@ -39,7 +39,7 @@ sealed trait Constructor extends Value with IConstructor {
 
   def iterator = children.iterator
   
-  def accept[T](v: IValueVisitor[T]): T = v visitConstructor this
+  def accept[T,E <: Throwable](v: IValueVisitor[T,E]): T = v visitConstructor this
 
   /*
    * TODO: improve IConstructor.get(String) lookup time

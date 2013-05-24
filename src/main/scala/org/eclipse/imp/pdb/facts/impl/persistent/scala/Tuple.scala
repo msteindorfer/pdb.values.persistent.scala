@@ -33,7 +33,7 @@ class Tuple(val t: Type, val xs: Tuple.Coll) extends Value with ITuple {
   
   def select(fields: Int*) = { 
     val resultType = t.select(fields: _*)
-    if (resultType.isTupleType)
+    if (resultType.isTuple)
       Tuple(resultType, (for (i <- fields) yield xs(i)): _*)
     else
       get(fields(0)) // TODO: ensure that one element is present
@@ -43,7 +43,7 @@ class Tuple(val t: Type, val xs: Tuple.Coll) extends Value with ITuple {
   
   def iterator = xs.iterator
 
-  def accept[T](v: IValueVisitor[T]): T = v visitTuple this
+  def accept[T,E <: Throwable](v: IValueVisitor[T,E]): T = v visitTuple this
 
   override def equals(other: Any): Boolean = other match {
     case that: Tuple => (this.xs equals that.xs)

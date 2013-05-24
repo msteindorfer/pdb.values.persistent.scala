@@ -38,7 +38,7 @@ sealed trait Node extends INode {
 
   def iterator = children.iterator
   
-  def accept[T](v: IValueVisitor[T]): T = v visitNode this
+  def accept[T,E <: Throwable](v: IValueVisitor[T,E]): T = v visitNode this
 
   
   

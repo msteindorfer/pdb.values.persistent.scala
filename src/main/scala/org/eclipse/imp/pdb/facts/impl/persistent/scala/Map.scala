@@ -76,7 +76,7 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
   @deprecated
   def entryIterator: java.util.Iterator[java.util.Map.Entry[IValue, IValue]] = mapAsJavaMap(xs).entrySet iterator
 
-  def accept[T](v: IValueVisitor[T]): T = v visitMap this
+  def accept[T,E <: Throwable](v: IValueVisitor[T,E]): T = v visitMap this
 
   override def equals(that: Any): Boolean = that match {
     case other: Map => this.xs equals other.xs

@@ -26,13 +26,13 @@ import collection.JavaConversions.iterableAsScalaIterable
 class Set(val et: Type, val xs: Set.Coll)
   extends Value with ISet {
 
-  require(if (xs.isEmpty) et.isVoidType() else true)
+  require(if (xs.isEmpty) et.isBottom else true)
   
   protected def lub(e: IValue) = et lub e.getType
   protected def lub(e: ISet) = et lub e.getElementType
 
   override val t = {
-    if (et isTupleType)
+    if (et isTuple)
       TypeFactory.getInstance relTypeFromTuple et
     else
       TypeFactory.getInstance setType et
@@ -93,8 +93,8 @@ class Set(val et: Type, val xs: Set.Coll)
 
   def iterator = xs.iterator
 
-  def accept[T](v: IValueVisitor[T]): T = {
-    if (et isTupleType)
+  def accept[T,E <: Throwable](v: IValueVisitor[T,E]): T = {
+    if (et isTuple)
       v visitRelation this
     else
       v visitSet this
@@ -107,7 +107,7 @@ class Set(val et: Type, val xs: Set.Coll)
 
   override lazy val hashCode = xs.hashCode
   
-  def isRelation = getType.isRelationType
+  def isRelation = getType.isRelation
   
   def asRelation = {
     import ImplicitRelationViewOnSet._

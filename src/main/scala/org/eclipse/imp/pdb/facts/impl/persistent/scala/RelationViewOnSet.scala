@@ -11,7 +11,7 @@ object ImplicitRelationViewOnSet {
   
   implicit class RelationViewOnSet(rel1: ISet) extends ISetRelation[ISet] {
     
-    require(rel1.getType.isRelationType)
+    require(rel1.getType.isRelation)
 
     def compose(rel2: ISetRelation[ISet]) = rel1 match {
       case rel1: Set => rel2.asSet() match {

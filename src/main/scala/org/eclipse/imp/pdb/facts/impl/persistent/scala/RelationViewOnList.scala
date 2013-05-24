@@ -14,7 +14,7 @@ object ImplicitRelationViewOnList {
 
   implicit class RelationViewOnList(rel1: IList) extends IListRelation[IList] {
     
-    require(rel1.getType.isListRelationType)
+    require(rel1.getType.isListRelation)
 
     //    def compose(rel2: IListRelation[IList]) = rel1 match {
     //      case rel1: List => rel2.asList() match {
