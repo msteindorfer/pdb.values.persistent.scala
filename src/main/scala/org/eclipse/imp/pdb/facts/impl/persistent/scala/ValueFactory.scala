@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
-import org.eclipse.imp.pdb.facts.impl.BaseValueFactory
 import org.eclipse.imp.pdb.facts.IString
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.ITuple
@@ -27,13 +26,13 @@ import org.eclipse.imp.pdb.facts.IListRelation
 import org.eclipse.imp.pdb.facts.IValueFactory
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
+import org.eclipse.imp.pdb.facts.impl.primitive.AbstractPrimitiveValueFactory
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.iterableAsScalaIterable
 import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
-import org.eclipse.imp.pdb.facts.impl.fast.FastBaseValueFactory
 
-class ValueFactory extends FastBaseValueFactory {
+class ValueFactory extends AbstractPrimitiveValueFactory {
   
   def tuple = Tuple()
 

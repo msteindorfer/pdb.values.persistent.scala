@@ -94,7 +94,9 @@ case class SimpleConstructor(val ct: Type, val children: Constructor.ChildrenCol
   extends Constructor {
 
   def getConstructorType = ct
-  
+
+  def getUninstantiatedConstructorType = ???
+
   override def t = ct.getAbstractDataType
    
   def set(i: Int, x: IValue) = SimpleConstructor(ct, children updated (i, x))
@@ -127,7 +129,9 @@ case class AnnotatedConstructor(val ct: Type, val children: Constructor.Children
   require (annotations.isEmpty == false)  
 
   def getConstructorType = ct
-  
+
+  def getUninstantiatedConstructorType = ???
+
   override def t = ct.getAbstractDataType 
   
   def set(i: Int, x: IValue) = AnnotatedConstructor(ct, children updated (i, x), annotations)
