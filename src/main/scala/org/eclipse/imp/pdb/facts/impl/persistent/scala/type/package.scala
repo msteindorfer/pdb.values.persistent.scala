@@ -7,8 +7,8 @@
  *
  * Contributors:
  *
- *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI  
- *******************************************************************************/
+ *    * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI
+ ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.IValue
@@ -18,9 +18,9 @@ import scala.collection.GenTraversable
 
 package object `type` {
 
-  // NOTE: nice example of how to shorten code
-  def lub(xs: GenTraversable[IValue]): Type = {
-    xs.foldLeft(TypeFactory.getInstance.voidType)((t, x) => t lub x.getType)
-  }
-    
+	// NOTE: nice example of how to shorten code
+	def lub(xs: GenTraversable[IValue]): Type = {
+		xs.foldLeft(TypeFactory.getInstance.voidType)((t, x) => t lub x.getType)
+	}
+
 }

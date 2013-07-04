@@ -7,137 +7,136 @@
  *
  * Contributors:
  *
- *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI  
- *******************************************************************************/
+ *    * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI
+ ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.IList
-import org.eclipse.imp.pdb.facts.IListWriter
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
-import org.eclipse.imp.pdb.facts.exceptions.UnexpectedElementTypeException
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
-import org.eclipse.imp.pdb.facts.visitors.VisitorException
 
 import collection.JavaConversions.asJavaIterator
-import collection.JavaConversions.iterableAsScalaIterable
 
 class List(val et: Type, val xs: ListColl)
-  extends Value with IList {  
-  
-  require(if (xs.isEmpty) et.isBottom else true)  
-  
-  private def lub(e: IValue) = et lub e.getType
-  private def lub(e: IList) = et lub e.getElementType
+	extends Value with IList {
 
-  override val t = {
-    val elementType = if (xs isEmpty) TypeFactory.getInstance voidType else et
+	require(if (xs.isEmpty) et.isBottom else true)
 
-    if (elementType isTuple)
-      TypeFactory.getInstance lrelTypeFromTuple elementType
-    else
-      TypeFactory.getInstance listType elementType
-  }
-  
-  def getElementType = et
+	private def lub(e: IValue) = et lub e.getType
 
-  def length = xs.length
+	private def lub(e: IList) = et lub e.getElementType
 
-  def reverse(): IList = List(et, xs.reverse)
+	override val t = {
+		val elementType = if (xs isEmpty) TypeFactory.getInstance voidType else et
 
-  def append(x: IValue): IList = List(this lub x, xs :+ x)
+		if (elementType isTuple)
+			TypeFactory.getInstance lrelTypeFromTuple elementType
+		else
+			TypeFactory.getInstance listType elementType
+	}
 
-  def insert(x: IValue): IList = List(this lub x, x +: xs)
+	def getElementType = et
 
-  def concat(other: IList): IList = other match {
-    case List(_, ys) => List(this lub other, xs ++ ys)
-  }
+	def length = xs.length
 
-  def put(i: Int, x: IValue): IList = List(this lub x, xs updated (i, x))
+	def reverse(): IList = List(et, xs.reverse)
 
-  def get(i: Int) = xs(i)
+	def append(x: IValue): IList = List(this lub x, xs :+ x)
 
-  def sublist(i: Int, n: Int): IList = { 
-    if (i < 0 || n < 0 || i + n > length) { throw new IndexOutOfBoundsException() } /* for compatibility with Rascal test suite */
-    List(et, xs slice (i, i + n))
-  }
+	def insert(x: IValue): IList = List(this lub x, x +: xs)
 
-  def isEmpty = xs.isEmpty
+	def concat(other: IList): IList = other match {
+		case List(_, ys) => List(this lub other, xs ++ ys)
+	}
 
-  def contains(e: IValue) = xs exists (_ == e)
+	def put(i: Int, x: IValue): IList = List(this lub x, xs updated(i, x))
 
-  def delete(x: IValue): IList = xs indexOf x match {
-    case i => if (i == -1) this.asInstanceOf[IList] else delete(i)
-  }
+	def get(i: Int) = xs(i)
 
-  def delete(i: Int): IList = List(et, (xs take i) ++ (xs drop i + 1))
+	def sublist(i: Int, n: Int): IList = {
+		if (i < 0 || n < 0 || i + n > length) {
+			throw new IndexOutOfBoundsException()
+		} /* for compatibility with Rascal test suite */
+		List(et, xs slice(i, i + n))
+	}
 
-  def intersect(other: IList): IList = other match {
-    case List(ot, ys) => {
-      val rt = et lub ot
-      val rv = for (x <- xs if ys exists (_ isEqual x)) yield x // xs intersect ys ??
+	def isEmpty = xs.isEmpty
 
-      List(rt, rv)
-    }
-  } 
-  
-  def subtract(other: IList): IList = other match {
-    case List(ot, ys) => List(ot, xs diff ys)
-  }
+	def contains(e: IValue) = xs exists (_ == e)
 
-  def product(other: IList): IList = other match {
-    case List(ot, ys) => {
-      val productType = TypeFactory.getInstance tupleType (et, ot)
-      List(productType, (for (x <- xs; y <- ys) yield Tuple(x, y)))
-    }
-  }
+	def delete(x: IValue): IList = xs indexOf x match {
+		case i => if (i == -1) this.asInstanceOf[IList] else delete(i)
+	}
 
-  // TODO: stop if iterator is exhausted
-  // NOTE: uses mutable BufferedIterator
-  def isSubListOf(other: IList): Boolean = other match {
-    case List(ot, ys) => {
-      val it = xs.iterator.buffered      
-      ys foreach ((y) => if (it.hasNext && it.head == y) it.next); it.isEmpty 
-    }
-  }
-    
-  def replace(first: Int, second: Int, end: Int, repl: IList): IList = ???  
-  
-  def iterator = xs.iterator
+	def delete(i: Int): IList = List(et, (xs take i) ++ (xs drop i + 1))
 
-  def accept[T,E <: Throwable](v: IValueVisitor[T,E]): T = {
-    if (et isTuple)
-      v visitListRelation this
-    else
-      v visitList this
-  }
-  
-  override def equals(that: Any): Boolean = that match {
-    case other: List => 
-      if (this.xs eq other.xs) true 
-      else {
-        if (this.length == other.length) (this.xs equals other.xs)
-        else false
-      }
-    case _ => false
-  }
+	def intersect(other: IList): IList = other match {
+		case List(ot, ys) => {
+			val rt = et lub ot
+			val rv = for (x <- xs if ys exists (_ isEqual x)) yield x // xs intersect ys ??
 
-  override lazy val hashCode = xs.hashCode
+			List(rt, rv)
+		}
+	}
 
-  def isRelation = getType.isRelation
-  
-  def asRelation = {
-    import ImplicitRelationViewOnList._
-    this
-  }
-  
+	def subtract(other: IList): IList = other match {
+		case List(ot, ys) => List(ot, xs diff ys)
+	}
+
+	def product(other: IList): IList = other match {
+		case List(ot, ys) => {
+			val productType = TypeFactory.getInstance tupleType(et, ot)
+			List(productType, (for (x <- xs; y <- ys) yield Tuple(x, y)))
+		}
+	}
+
+	// TODO: stop if iterator is exhausted
+	// NOTE: uses mutable BufferedIterator
+	def isSubListOf(other: IList): Boolean = other match {
+		case List(ot, ys) => {
+			val it = xs.iterator.buffered
+			ys foreach ((y) => if (it.hasNext && it.head == y) it.next);
+			it.isEmpty
+		}
+	}
+
+	def replace(first: Int, second: Int, end: Int, repl: IList): IList = ???
+
+	def iterator = xs.iterator
+
+	def accept[T, E <: Throwable](v: IValueVisitor[T, E]): T = {
+		if (et isTuple)
+			v visitListRelation this
+		else
+			v visitList this
+	}
+
+	override def equals(that: Any): Boolean = that match {
+		case other: List =>
+			if (this.xs eq other.xs) true
+			else {
+				if (this.length == other.length) (this.xs equals other.xs)
+				else false
+			}
+		case _ => false
+	}
+
+	override lazy val hashCode = xs.hashCode
+
+	def isRelation = getType.isRelation
+
+	def asRelation = {
+		import ImplicitRelationViewOnList._
+		this
+	}
+
 }
 
 object List {
-  def apply(et: Type, xs: ListColl): List = 
-    new List(if (xs isEmpty) TypeFactory.getInstance voidType else et, xs)
-  
-  def unapply(l: List) = Some(l.et, l.xs)
+	def apply(et: Type, xs: ListColl): List =
+		new List(if (xs isEmpty) TypeFactory.getInstance voidType else et, xs)
+
+	def unapply(l: List) = Some(l.et, l.xs)
 }

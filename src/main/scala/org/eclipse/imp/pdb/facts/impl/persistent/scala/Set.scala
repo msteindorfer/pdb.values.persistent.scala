@@ -7,121 +7,117 @@
  *
  * Contributors:
  *
- *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI  
- *******************************************************************************/
+ *    * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI
+ ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.ISet
-import org.eclipse.imp.pdb.facts.ISetWriter
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
-import org.eclipse.imp.pdb.facts.exceptions.UnexpectedElementTypeException
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
-import org.eclipse.imp.pdb.facts.visitors.VisitorException
 import collection.JavaConversions.asJavaIterator
-import collection.JavaConversions.iterableAsScalaIterable
 
 class Set(val et: Type, val xs: Set.Coll)
-  extends Value with ISet {
+	extends Value with ISet {
 
-  require(if (xs.isEmpty) et.isBottom else true)
-  
-  protected def lub(e: IValue) = et lub e.getType
-  protected def lub(e: ISet) = et lub e.getElementType
+	require(if (xs.isEmpty) et.isBottom else true)
 
-  override val t = {
-    if (et isTuple)
-      TypeFactory.getInstance relTypeFromTuple et
-    else
-      TypeFactory.getInstance setType et
-  }
-  
-  def getElementType = et
+	protected def lub(e: IValue) = et lub e.getType
 
-  def isEmpty = xs.isEmpty
+	protected def lub(e: ISet) = et lub e.getElementType
 
-  def size = xs.size
+	override val t = {
+		if (et isTuple)
+			TypeFactory.getInstance relTypeFromTuple et
+		else
+			TypeFactory.getInstance setType et
+	}
 
-  def contains(x: IValue) = xs contains x
+	def getElementType = et
 
-  def insert(x: IValue): ISet = Set(this lub x, xs + x)
+	def isEmpty = xs.isEmpty
 
-  def delete(x: IValue): ISet = Set(this lub x, xs - x)
-  
-  // TODO: higher order function with operation as parameter
-  def union(other: ISet): ISet = other match {
-    case Set(ot, ys) => {
-      val rt = et lub ot
-      val rv = xs | ys
+	def size = xs.size
 
-      Set(rt, rv)
-    }
-  }
+	def contains(x: IValue) = xs contains x
 
-  // TODO: higher order function with operation as parameter
-  def intersect(other: ISet): ISet = other match {
-    case Set(ot, ys) => {
-      val rt = et lub ot
-      val rv = xs & ys
+	def insert(x: IValue): ISet = Set(this lub x, xs + x)
 
-      Set(rt, rv)
-    }
-  }
-  
-  // TODO: higher order function with operation as parameter  
-  def subtract(other: ISet): ISet = other match {
-    case Set(ot, ys) => {
-      val rt = et // type is different from union and intersect
-      val rv = xs &~ ys
+	def delete(x: IValue): ISet = Set(this lub x, xs - x)
 
-      Set(rt, rv)
-    }
-  }
-  
-  def product(other: ISet): ISet = other match {
-    case Set(ot, ys) => {
-      val tupleType = TypeFactory.getInstance tupleType (et, ot)
-      Set(tupleType, for (x <- xs; y <- ys) yield Tuple(tupleType, x, y))
-    }
-  }
+	// TODO: higher order function with operation as parameter
+	def union(other: ISet): ISet = other match {
+		case Set(ot, ys) => {
+			val rt = et lub ot
+			val rv = xs | ys
 
-  def isSubsetOf(other: ISet) = other match {
-    case Set(_, ys) => xs subsetOf ys
-  }
+			Set(rt, rv)
+		}
+	}
 
-  def iterator = xs.iterator
+	// TODO: higher order function with operation as parameter
+	def intersect(other: ISet): ISet = other match {
+		case Set(ot, ys) => {
+			val rt = et lub ot
+			val rv = xs & ys
 
-  def accept[T,E <: Throwable](v: IValueVisitor[T,E]): T = {
-    if (et isTuple)
-      v visitRelation this
-    else
-      v visitSet this
-  }
+			Set(rt, rv)
+		}
+	}
 
-  override def equals(other: Any): Boolean = other match {
-    case that: Set => (this.xs equals that.xs)
-    case _ => false
-  }
+	// TODO: higher order function with operation as parameter
+	def subtract(other: ISet): ISet = other match {
+		case Set(ot, ys) => {
+			val rt = et // type is different from union and intersect
+			val rv = xs &~ ys
 
-  override lazy val hashCode = xs.hashCode
-  
-  def isRelation = getType.isRelation
-  
-  def asRelation = {
-    import ImplicitRelationViewOnSet._
-    this
-  }
-  
+			Set(rt, rv)
+		}
+	}
+
+	def product(other: ISet): ISet = other match {
+		case Set(ot, ys) => {
+			val tupleType = TypeFactory.getInstance tupleType(et, ot)
+			Set(tupleType, for (x <- xs; y <- ys) yield Tuple(tupleType, x, y))
+		}
+	}
+
+	def isSubsetOf(other: ISet) = other match {
+		case Set(_, ys) => xs subsetOf ys
+	}
+
+	def iterator = xs.iterator
+
+	def accept[T, E <: Throwable](v: IValueVisitor[T, E]): T = {
+		if (et isTuple)
+			v visitRelation this
+		else
+			v visitSet this
+	}
+
+	override def equals(other: Any): Boolean = other match {
+		case that: Set => (this.xs equals that.xs)
+		case _ => false
+	}
+
+	override lazy val hashCode = xs.hashCode
+
+	def isRelation = getType.isRelation
+
+	def asRelation = {
+		import ImplicitRelationViewOnSet._
+		this
+	}
+
 }
 
 object Set {
-  type Coll = collection.immutable.Set[IValue]
-  val empty = collection.immutable.Set.empty[IValue]
+	type Coll = collection.immutable.Set[IValue]
+	val empty = collection.immutable.Set.empty[IValue]
 
-  def apply(et: Type, xs: Coll): ISet = 
-    new Set(if (xs isEmpty) TypeFactory.getInstance voidType else et, xs)
-  
-  def unapply(s: Set) = Some(s.et, s.xs)
+	def apply(et: Type, xs: Coll): ISet =
+		new Set(if (xs isEmpty) TypeFactory.getInstance voidType else et, xs)
+
+	def unapply(s: Set) = Some(s.et, s.xs)
 }

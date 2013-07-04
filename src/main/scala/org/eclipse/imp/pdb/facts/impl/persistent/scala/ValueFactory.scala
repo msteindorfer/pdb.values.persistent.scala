@@ -7,106 +7,92 @@
  *
  * Contributors:
  *
- *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI  
- *******************************************************************************/
+ *    * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI
+ ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
-import org.eclipse.imp.pdb.facts.IString
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.ITuple
 import org.eclipse.imp.pdb.facts.IConstructor
-import org.eclipse.imp.pdb.facts.ISetWriter
-import org.eclipse.imp.pdb.facts.ISet
-import org.eclipse.imp.pdb.facts.IListWriter
 import org.eclipse.imp.pdb.facts.IList
-import org.eclipse.imp.pdb.facts.IMap
-import org.eclipse.imp.pdb.facts.IMapWriter
-import org.eclipse.imp.pdb.facts.INode
-import org.eclipse.imp.pdb.facts.IListRelation
-import org.eclipse.imp.pdb.facts.IValueFactory
 import org.eclipse.imp.pdb.facts.`type`.Type
-import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.impl.primitive.AbstractPrimitiveValueFactory
-import collection.JavaConversions.asJavaIterator
-import collection.JavaConversions.iterableAsScalaIterable
-import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
 
 class ValueFactory extends AbstractPrimitiveValueFactory {
-  
-  def tuple = Tuple()
 
-  def tuple(xs: IValue*) = Tuple(xs: _*)
+	def tuple = Tuple()
 
-  // TODO: currently the type is ignored and recalculated inside the constructor
-  def tuple(t: Type, xs: IValue*) = Tuple(xs: _*)
-  
-  def node(name: String) = Node(name)
+	def tuple(xs: IValue*) = Tuple(xs: _*)
 
-  def node(name: String, children: IValue*) = Node(name, Node.emptyChildren ++ children)
+	// TODO: currently the type is ignored and recalculated inside the constructor
+	def tuple(t: Type, xs: IValue*) = Tuple(xs: _*)
 
-  def node(name: String, children: Array[IValue], keyArgValues: java.util.Map[String,IValue]) = ???  
-  
-  def node(name: String, annotations: java.util.Map[String, IValue], children: IValue*) = Node(name, Node.emptyChildren ++ children, Node.emptyAnnotations ++ annotations)
-  
-  def constructor(t: Type) = Constructor(t)
+	def node(name: String) = Node(name)
 
-  def constructor(t: Type, children: IValue*) = Constructor(t, Constructor.emptyChildren ++ children)
+	def node(name: String, children: IValue*) = Node(name, Node.emptyChildren ++ children)
 
-  def constructor(t: Type, annotations: java.util.Map[String, IValue], children: IValue*): IConstructor = Constructor(t, Constructor.emptyChildren ++ children, Constructor.emptyAnnotations ++ annotations)
+	def node(name: String, children: Array[IValue], keyArgValues: java.util.Map[String, IValue]) = ???
 
-  def set(t: Type) = setWriter(t).done
+	def node(name: String, annotations: java.util.Map[String, IValue], children: IValue*) = Node(name, Node.emptyChildren ++ children, Node.emptyAnnotations ++ annotations)
 
-  def set(xs: IValue*) = {
-    val writer = setWriter
-    writer.insert(xs: _*)
-    writer.done
-  }
+	def constructor(t: Type) = Constructor(t)
 
-  def setWriter = new SetWriterWithTypeInference()
+	def constructor(t: Type, children: IValue*) = Constructor(t, Constructor.emptyChildren ++ children)
 
-  def setWriter(t: Type) = new SetWriter(t)
+	def constructor(t: Type, annotations: java.util.Map[String, IValue], children: IValue*): IConstructor = Constructor(t, Constructor.emptyChildren ++ children, Constructor.emptyAnnotations ++ annotations)
 
-  def list(t: Type) = listWriter(t).done 
+	def set(t: Type) = setWriter(t).done
 
-  def list(xs: IValue*): IList = {
-    val writer = listWriter
-    writer.insert(xs: _*)
-    writer.done
-  }
+	def set(xs: IValue*) = {
+		val writer = setWriter
+		writer.insert(xs: _*)
+		writer.done
+	}
 
-  def listWriter = new ListWriterWithTypeInference()
+	def setWriter = new SetWriterWithTypeInference()
 
-  def listWriter(t: Type) = new ListWriter(t)
+	def setWriter(t: Type) = new SetWriter(t)
 
-  def relation(t: Type) = setWriter(t).done
+	def list(t: Type) = listWriter(t).done
 
-  // TODO: add tests, not yet covered
-  def relation(xs: IValue*) = set(xs: _*)
-    
-  def relationWriter(t: Type) = new RelationWriter(t)
+	def list(xs: IValue*): IList = {
+		val writer = listWriter
+		writer.insert(xs: _*)
+		writer.done
+	}
 
-  def relationWriter = new RelationWriterWithTypeInference()
+	def listWriter = new ListWriterWithTypeInference()
 
-  def map(kt: Type, vt: Type) = mapWriter(kt, vt).done
+	def listWriter(t: Type) = new ListWriter(t)
 
-  def mapWriter = new MapWriterWithTypeInference()
+	def relation(t: Type) = setWriter(t).done
 
-  def mapWriter(kt: Type, vt: Type) = new MapWriter(kt, vt)
+	// TODO: add tests, not yet covered
+	def relation(xs: IValue*) = set(xs: _*)
 
-  def map(mapType: Type) = mapWriter(mapType).done    
-  
-  def mapWriter(mapType: Type) = new MapWriter(mapType)
+	def relationWriter(t: Type) = new RelationWriter(t)
 
-  def listRelation(t: Type) = listRelationWriter(t).done
-    
-  // TODO: add tests, not yet covered
-  def listRelation(xs: IValue*) = list(xs: _*)
-  
-  def listRelationWriter(t: Type) = new ListRelationWriter(t)
-  
-  def listRelationWriter = new ListRelationWriterWithTypeInference()
-  
-  override def toString = "VF_SCALA"
-  
+	def relationWriter = new RelationWriterWithTypeInference()
+
+	def map(kt: Type, vt: Type) = mapWriter(kt, vt).done
+
+	def mapWriter = new MapWriterWithTypeInference()
+
+	def mapWriter(kt: Type, vt: Type) = new MapWriter(kt, vt)
+
+	def map(mapType: Type) = mapWriter(mapType).done
+
+	def mapWriter(mapType: Type) = new MapWriter(mapType)
+
+	def listRelation(t: Type) = listRelationWriter(t).done
+
+	// TODO: add tests, not yet covered
+	def listRelation(xs: IValue*) = list(xs: _*)
+
+	def listRelationWriter(t: Type) = new ListRelationWriter(t)
+
+	def listRelationWriter = new ListRelationWriterWithTypeInference()
+
+	override def toString = "VF_SCALA"
+
 }

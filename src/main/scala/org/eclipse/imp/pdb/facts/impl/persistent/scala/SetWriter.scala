@@ -7,8 +7,8 @@
  *
  * Contributors:
  *
- *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI  
- *******************************************************************************/
+ *    * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI
+ ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.ISetWriter
@@ -22,22 +22,28 @@ import collection.JavaConversions.iterableAsScalaIterable
 
 class SetWriter(et: Type, var xs: Set.Coll) extends ISetWriter {
 
-  def this(t: Type) = this(t, Set.empty) 
+	def this(t: Type) = this(t, Set.empty)
 
-  def size = xs.size
-  
-  def done: ISet = Set(et, xs)
-  
-  def insert(ys: IValue*) { xs = xs ++ ys }       
-      
-  def insertAll(ys: java.lang.Iterable[_ <: IValue]) { xs = xs ++ ys} 
-  
-  def delete(x: IValue) {xs = xs - x}
+	def size = xs.size
+
+	def done: ISet = Set(et, xs)
+
+	def insert(ys: IValue*) {
+		xs = xs ++ ys
+	}
+
+	def insertAll(ys: java.lang.Iterable[_ <: IValue]) {
+		xs = xs ++ ys
+	}
+
+	def delete(x: IValue) {
+		xs = xs - x
+	}
 
 }
 
 sealed class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
-   
-  override def done: ISet = Set(`type` lub xs, xs)
-  
+
+	override def done: ISet = Set(`type` lub xs, xs)
+
 }

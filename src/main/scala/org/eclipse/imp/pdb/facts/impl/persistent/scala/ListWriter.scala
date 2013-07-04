@@ -7,54 +7,50 @@
  *
  * Contributors:
  *
- *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI  
- *******************************************************************************/
+ *    * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI
+ ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.IList
 import org.eclipse.imp.pdb.facts.IListWriter
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.exceptions.FactTypeUseException
-import org.eclipse.imp.pdb.facts.exceptions.UnexpectedElementTypeException
 import org.eclipse.imp.pdb.facts.`type`._
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
-import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
-import org.eclipse.imp.pdb.facts.visitors.VisitorException
 
 import collection.mutable.ListBuffer
 import collection.JavaConversions.iterableAsScalaIterable
 
 class ListWriter(t: Type) extends IListWriter {
-  
-  val xs = ListBuffer[IValue]()
 
-  def insert(ys: IValue*): Unit = ys ++=: xs
+	val xs = ListBuffer[IValue]()
 
-  def insert(ys: Array[IValue], i: Int, n: Int) = this insert ((ys slice (i, i + n)): _*)
+	def insert(ys: IValue*): Unit = ys ++=: xs
 
-  def insertAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs prependAll ys
+	def insert(ys: Array[IValue], i: Int, n: Int) = this insert ((ys slice(i, i + n)): _*)
 
-  def insertAt(i: Int, ys: IValue*) = xs insertAll (i, ys)
+	def insertAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs prependAll ys
 
-  def insertAt(i: Int, ys: Array[IValue], j: Int, n: Int) = this insertAt (i, (ys slice (j, j + n)): _*)
+	def insertAt(i: Int, ys: IValue*) = xs insertAll(i, ys)
 
-  def replaceAt(i: Int, x: IValue) = xs update (i, x)
+	def insertAt(i: Int, ys: Array[IValue], j: Int, n: Int) = this insertAt(i, (ys slice(j, j + n)): _*)
 
-  def append(ys: IValue*): Unit = xs ++= ys
+	def replaceAt(i: Int, x: IValue) = xs update(i, x)
 
-  def appendAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs appendAll ys
+	def append(ys: IValue*): Unit = xs ++= ys
 
-  def size = xs size
-  
-  def done: IList = List(t, emptyList ++ xs.result)
+	def appendAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs appendAll ys
+
+	def size = xs size
+
+	def done: IList = List(t, emptyList ++ xs.result)
 
 }
 
 sealed class ListWriterWithTypeInference() extends ListWriter(TypeFactory.getInstance voidType) {
 
-  override def done: IList = {
-    val zs = emptyList ++ xs;
-    List(`type` lub zs, zs)
-  }
-  
+	override def done: IList = {
+		val zs = emptyList ++ xs;
+		List(`type` lub zs, zs)
+	}
+
 }

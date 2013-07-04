@@ -7,31 +7,28 @@
  *
  * Contributors:
  *
- *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI  
- *******************************************************************************/
+ *    * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI
+ ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
-import org.eclipse.imp.pdb.facts.IListRelation
-import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.ITuple
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 
 class ListRelationWriter(et: Type)
-  extends ListWriter(et) {
+	extends ListWriter(et) {
 
-  require (et isTuple)
-  
-  override def done = List(et, emptyList ++ xs.result)
-  
+	require(et isTuple)
+
+	override def done = List(et, emptyList ++ xs.result)
+
 }
 
 sealed class ListRelationWriterWithTypeInference()
-  extends ListRelationWriter(TypeFactory.getInstance voidType) {
-  
-  override def done = {
-    val zs = emptyList ++ xs.result ;
-    List(`type` lub zs, zs)
-  }  
-  
+	extends ListRelationWriter(TypeFactory.getInstance voidType) {
+
+	override def done = {
+		val zs = emptyList ++ xs.result;
+		List(`type` lub zs, zs)
+	}
+
 }

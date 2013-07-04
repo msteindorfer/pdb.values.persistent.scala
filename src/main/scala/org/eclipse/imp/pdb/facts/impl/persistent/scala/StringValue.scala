@@ -7,15 +7,11 @@
  *
  * Contributors:
  *
- *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI  
- *******************************************************************************/
+ *    * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI
+ ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
-import org.eclipse.imp.pdb.facts.IString
-import org.eclipse.imp.pdb.facts.`type`.TypeFactory
-import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
-import scala.collection.mutable.StringBuilder
-import org.eclipse.imp.pdb.facts.`type`.TypeFactory
+
 
 // TODO: make value class (i.e. extend from AnyVal)
 //case class StringValue(val content: String) extends Value with IString {

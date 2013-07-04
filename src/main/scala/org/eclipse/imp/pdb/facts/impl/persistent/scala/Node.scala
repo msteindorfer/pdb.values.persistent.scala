@@ -7,128 +7,125 @@
  *
  * Contributors:
  *
- *   * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI  
- *******************************************************************************/
+ *    * Michael Steindorfer - Michael.Steindorfer@cwi.nl - CWI
+ ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import org.eclipse.imp.pdb.facts.INode
-import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import collection.JavaConversions.asJavaIterator
-import collection.JavaConversions.iterableAsScalaIterable
 import collection.JavaConversions.mapAsJavaMap
 import collection.JavaConversions.mapAsScalaMap
 import org.eclipse.imp.pdb.facts.IList
 
 sealed trait Node extends INode {
-  
-  def name: String
-  
-  def children: Node.ChildrenColl
-  
-  def get(i: Int) = children(i)
 
-  def arity = children.length
+	def name: String
 
-  def getName = name
+	def children: Node.ChildrenColl
 
-  def getChildren = this
+	def get(i: Int) = children(i)
 
-  def iterator = children.iterator
-  
-  def accept[T,E <: Throwable](v: IValueVisitor[T,E]): T = v visitNode this
+	def arity = children.length
 
-  
-  
-  def replace(first: Int, second: Int, end: Int, repl: IList) = ???
-  
-  def hasKeywordArguments: Boolean = ???
-  
-  def getKeywordArgumentNames: Array[String] = ???
+	def getName = name
 
-  def getKeywordIndex(name: String): Int = ???
+	def getChildren = this
 
-  def getKeywordArgumentValue(name: String): IValue = ???
+	def iterator = children.iterator
 
-  def positionalArity: Int = ???
-  
+	def accept[T, E <: Throwable](v: IValueVisitor[T, E]): T = v visitNode this
+
+
+	def replace(first: Int, second: Int, end: Int, repl: IList) = ???
+
+	def hasKeywordArguments: Boolean = ???
+
+	def getKeywordArgumentNames: Array[String] = ???
+
+	def getKeywordIndex(name: String): Int = ???
+
+	def getKeywordArgumentValue(name: String): IValue = ???
+
+	def positionalArity: Int = ???
+
 }
 
 object Node {
 
-  type ChildrenColl = collection.immutable.Vector[IValue]    
-  val emptyChildren = collection.immutable.Vector.empty[IValue]
-  
-//  type ChildrenColl = scala.Array[IValue]    
-//  val emptyChildren = scala.Array.empty[IValue]
+	type ChildrenColl = collection.immutable.Vector[IValue]
+	val emptyChildren = collection.immutable.Vector.empty[IValue]
 
-  type AnnotationsColl = collection.immutable.Map[String, IValue]
-  val emptyAnnotations = collection.immutable.Map.empty[String, IValue]  
-  
-  def apply(name: String) = SimpleNode(name, emptyChildren)
+	//  type ChildrenColl = scala.Array[IValue]
+	//  val emptyChildren = scala.Array.empty[IValue]
 
-  def apply(name: String, children: ChildrenColl) = SimpleNode(name, children)
-   
-  def apply(name: String, children: ChildrenColl, annotations: AnnotationsColl) = AnnotatedNode(name, children, annotations)
-  
+	type AnnotationsColl = collection.immutable.Map[String, IValue]
+	val emptyAnnotations = collection.immutable.Map.empty[String, IValue]
+
+	def apply(name: String) = SimpleNode(name, emptyChildren)
+
+	def apply(name: String, children: ChildrenColl) = SimpleNode(name, children)
+
+	def apply(name: String, children: ChildrenColl, annotations: AnnotationsColl) = AnnotatedNode(name, children, annotations)
+
 }
 
 case class SimpleNode(val name: String, val children: Node.ChildrenColl)
-  extends Value with Node {
-  
-  override val t = TypeFactory.getInstance.nodeType
-    
-  def set(i: Int, x: IValue) = SimpleNode(name, children updated (i, x))
-  
-  def setAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedNode(name, children, Node.emptyAnnotations ++ newAnnotations)
+	extends Value with Node {
 
-  def joinAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedNode(name, children, Node.emptyAnnotations ++ newAnnotations)
+	override val t = TypeFactory.getInstance.nodeType
 
-  def setAnnotation(label: String, newValue: IValue) = AnnotatedNode(name, children, Node.emptyAnnotations + (label -> newValue))
+	def set(i: Int, x: IValue) = SimpleNode(name, children updated(i, x))
 
-  def hasAnnotations = false
+	def setAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedNode(name, children, Node.emptyAnnotations ++ newAnnotations)
 
-  def hasAnnotation(label: String) = false  
-  
-  def getAnnotations = Node.emptyAnnotations
-  
-  def getAnnotation(label: String) = null
+	def joinAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedNode(name, children, Node.emptyAnnotations ++ newAnnotations)
 
-  def removeAnnotations = this  
+	def setAnnotation(label: String, newValue: IValue) = AnnotatedNode(name, children, Node.emptyAnnotations + (label -> newValue))
 
-  def removeAnnotation(key: String) = this
-    
+	def hasAnnotations = false
+
+	def hasAnnotation(label: String) = false
+
+	def getAnnotations = Node.emptyAnnotations
+
+	def getAnnotation(label: String) = null
+
+	def removeAnnotations = this
+
+	def removeAnnotation(key: String) = this
+
 }
 
 case class AnnotatedNode(val name: String, val children: Node.ChildrenColl, val annotations: Node.AnnotationsColl)
-  extends Value with Node {
-  
-  require (annotations.isEmpty == false)  
-  
-  override val t = TypeFactory.getInstance.nodeType  
-  
-  def set(i: Int, x: IValue) = AnnotatedNode(name, children updated (i, x), annotations)
-    
-  override def setAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedNode(name, children, Node.emptyAnnotations ++ newAnnotations)
+	extends Value with Node {
 
-  override def joinAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedNode(name, children, Node.emptyAnnotations ++ newAnnotations)
+	require(annotations.isEmpty == false)
 
-  override def setAnnotation(label: String, newValue: IValue) = AnnotatedNode(name, children, Node.emptyAnnotations + (label -> newValue))
+	override val t = TypeFactory.getInstance.nodeType
 
-  def hasAnnotations = true
+	def set(i: Int, x: IValue) = AnnotatedNode(name, children updated(i, x), annotations)
 
-  def hasAnnotation(label: String) = annotations contains label  
-  
-  def getAnnotations = annotations
-  
-  def getAnnotation(label: String) = annotations.getOrElse(label, null)
+	override def setAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedNode(name, children, Node.emptyAnnotations ++ newAnnotations)
 
-  def removeAnnotations = SimpleNode(name, children)  
+	override def joinAnnotations(newAnnotations: java.util.Map[String, IValue]) = AnnotatedNode(name, children, Node.emptyAnnotations ++ newAnnotations)
 
-  def removeAnnotation(key: String) = (annotations - key) match {
-    case newAnnotations => if(newAnnotations.isEmpty) SimpleNode(name, children) else AnnotatedNode(name, children, newAnnotations)
-  }
-    
+	override def setAnnotation(label: String, newValue: IValue) = AnnotatedNode(name, children, Node.emptyAnnotations + (label -> newValue))
+
+	def hasAnnotations = true
+
+	def hasAnnotation(label: String) = annotations contains label
+
+	def getAnnotations = annotations
+
+	def getAnnotation(label: String) = annotations.getOrElse(label, null)
+
+	def removeAnnotations = SimpleNode(name, children)
+
+	def removeAnnotation(key: String) = (annotations - key) match {
+		case newAnnotations => if (newAnnotations.isEmpty) SimpleNode(name, children) else AnnotatedNode(name, children, newAnnotations)
+	}
+
 }
