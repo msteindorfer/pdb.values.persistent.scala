@@ -61,9 +61,9 @@ class ValueFactory extends org.eclipse.imp.pdb.facts.impl.primitive.AbstractPrim
 		writer.done
 	}
 
-	def listWriter = new ListWriterWithTypeInference()
+	def listWriter = new ListWriter
 
-	def listWriter(t: Type) = new ListWriter(t)
+	def listWriter(t: Type) = listWriter
 
 	def relation(t: Type) = setWriter(t).done
 
@@ -92,9 +92,12 @@ class ValueFactory extends org.eclipse.imp.pdb.facts.impl.primitive.AbstractPrim
 	// TODO: add tests, not yet covered
 	def listRelation(xs: IValue*) = list(xs: _*)
 
-	def listRelationWriter(t: Type) = new ListRelationWriter(t)
+	def listRelationWriter = listWriter
 
-	def listRelationWriter = new ListRelationWriterWithTypeInference()
+	def listRelationWriter(et: Type) = {
+		require(et isTuple)
+		listWriter
+	}
 
 	override def toString = "VF_SCALA"
 

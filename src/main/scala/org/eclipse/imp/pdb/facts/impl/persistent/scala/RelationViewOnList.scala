@@ -103,7 +103,7 @@ object ImplicitRelationViewOnList {
 			val newTupleFieldTypes = Array[Type](rel1.getElementType().getFieldType(0), otherTupleType.getFieldType(1));
 			val tupleType = typeFactory.tupleType(newTupleFieldTypes: _*);
 
-			val w = new ListWriter(tupleType);
+			val w = new ListWriter;
 
 			for (v1 <- rel1.asScala) {
 				val tuple1 = v1.asInstanceOf[ITuple];
@@ -132,7 +132,7 @@ object ImplicitRelationViewOnList {
 			while (prevCount != tmp.length()) {
 				prevCount = tmp.length();
 				val tcomp = f_compose(tmp, tmp);
-				val w = new ListWriter(resultType.getElementType());
+				val w = new ListWriter
 				for (t1 <- tcomp.asScala) {
 					if (!tmp.contains(t1)) {
 						if (!addedTuples.contains(t1)) {
@@ -162,7 +162,7 @@ object ImplicitRelationViewOnList {
 			import collection.JavaConverters._
 
 			val newType = rel1.getType().carrier();
-			val w = new ListWriter(newType.getElementType());
+			val w = new ListWriter
 
 			val cache = new java.util.HashSet[IValue]();
 

@@ -20,37 +20,31 @@ import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import collection.mutable.ListBuffer
 import collection.JavaConversions.iterableAsScalaIterable
 
-class ListWriter(t: Type) extends IListWriter {
+sealed class ListWriter extends IListWriter {
 
-	val xs = ListBuffer[IValue]()
+	val xs: ListBuffer[IValue] = ListBuffer[IValue]()
 
-	def insert(ys: IValue*): Unit = ys ++=: xs
+	override def insert(ys: IValue*): Unit = ys ++=: xs
 
-	def insert(ys: Array[IValue], i: Int, n: Int) = this insert ((ys slice(i, i + n)): _*)
+	override def insert(ys: Array[IValue], i: Int, n: Int) = this insert ((ys slice(i, i + n)): _*)
 
-	def insertAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs prependAll ys
+	override def insertAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs prependAll ys
 
-	def insertAt(i: Int, ys: IValue*) = xs insertAll(i, ys)
+	override def insertAt(i: Int, ys: IValue*) = xs insertAll(i, ys)
 
-	def insertAt(i: Int, ys: Array[IValue], j: Int, n: Int) = this insertAt(i, (ys slice(j, j + n)): _*)
+	override def insertAt(i: Int, ys: Array[IValue], j: Int, n: Int) = this insertAt(i, (ys slice(j, j + n)): _*)
 
-	def replaceAt(i: Int, x: IValue) = xs update(i, x)
+	override def replaceAt(i: Int, x: IValue) = xs update(i, x)
 
-	def append(ys: IValue*): Unit = xs ++= ys
+	override def append(ys: IValue*): Unit = xs ++= ys
 
-	def appendAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs appendAll ys
+	override def appendAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs appendAll ys
 
-	def size = xs size
-
-	def done: IList = List(t, emptyList ++ xs.result)
-
-}
-
-sealed class ListWriterWithTypeInference() extends ListWriter(TypeFactory.getInstance voidType) {
+	override def size = xs size
 
 	override def done: IList = {
-		val zs = emptyList ++ xs;
-		List(`type` lub zs, zs)
+		val res = emptyList ++ xs.result
+		List(`type` lub res, res)
 	}
 
 }
