@@ -40,8 +40,6 @@ sealed class ListWriter extends IListWriter {
 
 	override def appendAll(ys: java.lang.Iterable[_ <: org.eclipse.imp.pdb.facts.IValue]) = xs appendAll ys
 
-	override def size = xs size
-
 	override def done: IList = {
 		val res = emptyList ++ xs.result
 		List(`type` lub res, res)
