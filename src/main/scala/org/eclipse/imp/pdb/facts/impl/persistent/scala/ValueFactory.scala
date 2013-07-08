@@ -79,13 +79,13 @@ class ValueFactory extends org.eclipse.imp.pdb.facts.impl.primitive.AbstractPrim
 	
 	def map(kt: Type, vt: Type) = mapWriter(kt, vt).done
 
-	def mapWriter = new MapWriterWithTypeInference()
+	def mapWriter = new MapWriter
 
-	def mapWriter(kt: Type, vt: Type) = new MapWriter(kt, vt)
+	def mapWriter(kt: Type, vt: Type) = mapWriter
 
 	def map(mapType: Type) = mapWriter(mapType).done
 
-	def mapWriter(mapType: Type) = new MapWriter(mapType)
+	def mapWriter(mapType: Type) = mapWriter
 
 	def listRelation(t: Type) = listRelationWriter(t).done
 

@@ -25,40 +25,40 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
 
 	override lazy val t = TypeFactory.getInstance mapType(kt, vt)
 
-	def isEmpty = xs isEmpty
+	override def isEmpty = xs isEmpty
 
-	def size = xs size
+	override def size = xs size
 
-	def put(k: IValue, v: IValue) = Map(this.kt lub k.getType, this.vt lub v.getType, xs + (k -> v))
+	override def put(k: IValue, v: IValue) = Map(this.kt lub k.getType, this.vt lub v.getType, xs + (k -> v))
 
-	def get(k: IValue) = xs getOrElse(k, null)
+	override def get(k: IValue) = xs getOrElse(k, null)
 
-	def containsKey(k: IValue) = xs contains k
+	override def containsKey(k: IValue) = xs contains k
 
-	def containsValue(v: IValue) = xs exists {
+	override def containsValue(v: IValue) = xs exists {
 		case (_, cv) => v == cv
 	}
 
-	def getKeyType = kt
+	override def getKeyType = kt
 
-	def getValueType = vt
+	override def getValueType = vt
 
-	def join(other: IMap): IMap = other match {
+	override def join(other: IMap): IMap = other match {
 		case Map(okt, ovt, ys) =>
 			Map(this.kt lub okt, this.vt lub ovt, xs ++ ys)
 	}
 
-	def remove(other: IMap): IMap = other match {
+	override def remove(other: IMap): IMap = other match {
 		case Map(okt, ovt, ys) =>
 			Map(this.kt lub okt, this.vt lub ovt,
 				xs -- ys.keySet)
 	}
 
-	def compose(other: IMap): IMap = other match {
+	override def compose(other: IMap): IMap = other match {
 		case Map(_, ovt, ys) => Map(kt, ovt, for ((k, v) <- xs if ys contains v) yield (k, ys(v)))
 	}
 
-	def common(other: IMap) = other match {
+	override def common(other: IMap) = other match {
 		case Map(okt, ovt, ys) =>
 			Map(this.kt lub okt, this.vt lub ovt,
 				xs filter {
@@ -66,18 +66,18 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
 				})
 	}
 
-	def isSubMap(other: IMap) = other match {
+	override def isSubMap(other: IMap) = other match {
 		case Map(_, _, ys) => xs.keys forall (k => (ys contains k) && (ys(k) isEqual xs(k)))
 	}
 
-	def iterator = xs.keys iterator
+	override def iterator = xs.keys iterator
 
-	def valueIterator = xs.values iterator
+	override def valueIterator = xs.values iterator
 
 	@deprecated
-	def entryIterator: java.util.Iterator[java.util.Map.Entry[IValue, IValue]] = mapAsJavaMap(xs).entrySet iterator
+	override def entryIterator: java.util.Iterator[java.util.Map.Entry[IValue, IValue]] = mapAsJavaMap(xs).entrySet iterator
 
-	def accept[T, E <: Throwable](v: IValueVisitor[T, E]): T = v visitMap this
+	override def accept[T, E <: Throwable](v: IValueVisitor[T, E]): T = v visitMap this
 
 	override def equals(that: Any): Boolean = that match {
 		case other: Map => this.xs equals other.xs
@@ -86,4 +86,9 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
 
 	override lazy val hashCode = xs.hashCode
 
+}
+
+object Map {
+	type Coll = collection.immutable.Map[IValue, IValue]
+	val empty = collection.immutable.Map.empty[IValue, IValue]
 }
