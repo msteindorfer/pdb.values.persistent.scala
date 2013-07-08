@@ -11,39 +11,28 @@
  ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
+import scala.collection.JavaConversions.iterableAsScalaIterable
+import scala.collection.mutable.SetBuilder
+
+import org.eclipse.imp.pdb.facts.ISet
 import org.eclipse.imp.pdb.facts.ISetWriter
 import org.eclipse.imp.pdb.facts.IValue
-import org.eclipse.imp.pdb.facts.ISet
-import org.eclipse.imp.pdb.facts.`type`._
-import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 
-import collection.JavaConversions.iterableAsScalaIterable
+sealed class SetWriter extends ISetWriter {
 
+	val xs: SetBuilder[IValue, Set.Coll] = new SetBuilder(Set.empty)
 
-class SetWriter(et: Type, var xs: Set.Coll) extends ISetWriter {
-
-	def this(t: Type) = this(t, Set.empty)
-
-	def size = xs.size
-
-	def done: ISet = Set(et, xs)
-
-	def insert(ys: IValue*) {
-		xs = xs ++ ys
+	override def insert(ys: IValue*) {
+		xs ++= ys
 	}
 
-	def insertAll(ys: java.lang.Iterable[_ <: IValue]) {
-		xs = xs ++ ys
+	override def insertAll(ys: java.lang.Iterable[_ <: IValue]) {
+		xs ++= ys
 	}
 
-	def delete(x: IValue) {
-		xs = xs - x
+	override def done: ISet = {
+		val res = xs.result
+		Set(`type` lub res, res)
 	}
-
-}
-
-sealed class SetWriterWithTypeInference() extends SetWriter(TypeFactory.getInstance voidType) {
-
-	override def done: ISet = Set(`type` lub xs, xs)
 
 }

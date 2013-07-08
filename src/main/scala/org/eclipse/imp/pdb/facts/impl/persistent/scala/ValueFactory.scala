@@ -11,14 +11,14 @@
  ******************************************************************************/
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
-import org.eclipse.imp.pdb.facts.IValue
+import scala.collection.JavaConversions.mapAsScalaMap
+
 import org.eclipse.imp.pdb.facts.IConstructor
 import org.eclipse.imp.pdb.facts.IList
+import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.`type`.Type
-import org.eclipse.imp.pdb.facts.impl.primitive.AbstractPrimitiveValueFactory
-import collection.JavaConversions.mapAsScalaMap
 
-class ValueFactory extends AbstractPrimitiveValueFactory {
+class ValueFactory extends org.eclipse.imp.pdb.facts.impl.primitive.AbstractPrimitiveValueFactory {
 
 	def tuple = Tuple()
 
@@ -49,9 +49,9 @@ class ValueFactory extends AbstractPrimitiveValueFactory {
 		writer.done
 	}
 
-	def setWriter = new SetWriterWithTypeInference()
+	def setWriter = new SetWriter
 
-	def setWriter(t: Type) = new SetWriter(t)
+	def setWriter(t: Type) = setWriter
 
 	def list(t: Type) = listWriter(t).done
 
@@ -70,10 +70,13 @@ class ValueFactory extends AbstractPrimitiveValueFactory {
 	// TODO: add tests, not yet covered
 	def relation(xs: IValue*) = set(xs: _*)
 
-	def relationWriter(t: Type) = new RelationWriter(t)
+	def relationWriter(et: Type) = {
+	  	require(et isTuple); 
+	  	setWriter
+	}
 
-	def relationWriter = new RelationWriterWithTypeInference()
-
+	def relationWriter = setWriter
+	
 	def map(kt: Type, vt: Type) = mapWriter(kt, vt).done
 
 	def mapWriter = new MapWriterWithTypeInference()
