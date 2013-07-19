@@ -12,10 +12,11 @@
 package org.eclipse.imp.pdb.facts.impl.persistent.scala
 
 import java.io.StringWriter
-
 import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.io.StandardTextWriter
 import org.eclipse.imp.pdb.facts.`type`.Type
+import org.eclipse.imp.pdb.facts.IAnnotatable
+import org.eclipse.imp.pdb.facts.exceptions.IllegalOperationException
 
 trait Value extends IValue {
 
@@ -25,6 +26,13 @@ trait Value extends IValue {
 
 	def isEqual(that: IValue) = this equals that
 
+	def isAnnotatable = false
+	
+	def asAnnotatable: IAnnotatable[_ <: IValue] = {
+		throw new IllegalOperationException(
+				"Cannot be viewed as annotatable.", getType());
+	}
+	
 	final override def toString: String = {
 		val stream = new StringWriter
 		new StandardTextWriter write(this, stream)
