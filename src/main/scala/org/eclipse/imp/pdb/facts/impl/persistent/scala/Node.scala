@@ -23,7 +23,7 @@ import org.eclipse.imp.pdb.facts.impl.func.NodeFunctions
 import org.eclipse.imp.pdb.facts.IAnnotatable
 import org.eclipse.imp.pdb.facts.impl.AbstractDefaultAnnotatable
 import org.eclipse.imp.pdb.facts.impl.AnnotatedNodeFacade
-import org.eclipse.imp.pdb.facts.util.ImmutableMap
+import org.eclipse.imp.pdb.facts.util.ImmutableJdkMap
 import org.eclipse.imp.pdb.facts.impl.AbstractNode
 
 case class Node(val name: String, val children: Node.ChildrenColl) extends AbstractNode {

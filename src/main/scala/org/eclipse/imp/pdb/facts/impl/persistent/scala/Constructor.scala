@@ -22,7 +22,7 @@ import collection.JavaConversions.mapAsScalaMap
 import org.eclipse.imp.pdb.facts.IList
 import org.eclipse.imp.pdb.facts.IAnnotatable
 import org.eclipse.imp.pdb.facts.impl.AbstractDefaultAnnotatable
-import org.eclipse.imp.pdb.facts.util.ImmutableMap
+import org.eclipse.imp.pdb.facts.util.ImmutableJdkMap
 import org.eclipse.imp.pdb.facts.impl.AnnotatedConstructorFacade
 
 case class Constructor(val ct: Type, val children: Constructor.ChildrenColl) extends Value with IConstructor {
@@ -80,7 +80,7 @@ case class Constructor(val ct: Type, val children: Constructor.ChildrenColl) ext
 	
 	override def asAnnotatable: IAnnotatable[_ <: IConstructor] = {
 		return new AbstractDefaultAnnotatable[IConstructor](this) {
-			override def wrap(content: IConstructor, annotations: ImmutableMap[String, IValue]): IConstructor = {
+			override def wrap(content: IConstructor, annotations: ImmutableJdkMap[String, IValue]): IConstructor = {
 				return new AnnotatedConstructorFacade(content, annotations);
 			}
 		};
