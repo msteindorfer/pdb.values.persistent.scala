@@ -44,6 +44,7 @@ class Set(val et: Type, val xs: Set.Coll)
 
 	def insert(x: IValue): ISet = Set(this lub x, xs + x)
 
+	// TODO: lub is broken (does not shrink)
 	def delete(x: IValue): ISet = Set(this lub x, xs - x)
 
 	// TODO: higher order function with operation as parameter

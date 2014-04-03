@@ -41,6 +41,8 @@ class ValueFactory extends org.eclipse.imp.pdb.facts.impl.primitive.AbstractPrim
 
 	def constructor(t: Type, annotations: java.util.Map[String, IValue], children: IValue*): IConstructor = Constructor(t, Constructor.emptyChildren ++ children).asAnnotatable().setAnnotations(annotations)
 
+	def constructor(t: Type, children: Array[IValue], kwParams: java.util.Map[String, IValue]): IConstructor = ???
+	
 	def set(t: Type) = setWriter(t).done
 
 	def set(xs: IValue*) = {
