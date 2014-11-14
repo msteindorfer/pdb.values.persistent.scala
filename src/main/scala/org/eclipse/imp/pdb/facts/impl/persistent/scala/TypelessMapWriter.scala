@@ -17,13 +17,14 @@ import org.eclipse.imp.pdb.facts.IMap
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.ITuple
+import collection.immutable.Map.empty
 import collection.JavaConversions.mapAsScalaMap
 import collection.JavaConversions.iterableAsScalaIterable
 import scala.collection.mutable.MapBuilder
 
-sealed class MapWriter extends IMapWriter {
+sealed class TypelessMapWriter extends IMapWriter {
 	
-	val xs: MapBuilder[IValue, IValue, Map.Coll] = new MapBuilder(org.eclipse.imp.pdb.facts.impl.persistent.scala.Map.empty)
+	val xs: MapBuilder[IValue, IValue, TypelessMap.Coll] = new MapBuilder(TypelessMap.empty)
 
 	override def put(k: IValue, v: IValue) = xs += (k -> v)
 
@@ -37,9 +38,6 @@ sealed class MapWriter extends IMapWriter {
 
 	override def insertAll(ys: java.lang.Iterable[_ <: IValue]): Unit = ys foreach (this insert _)
 
-	override def done = {
-		val res = xs.result
-		Map(`type` lub res.keys, `type` lub res.values, res)
-	}
-	
+	override def done = TypelessMap(xs.result)
+
 }

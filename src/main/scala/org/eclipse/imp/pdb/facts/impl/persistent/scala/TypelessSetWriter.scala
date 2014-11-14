@@ -18,9 +18,9 @@ import org.eclipse.imp.pdb.facts.ISet
 import org.eclipse.imp.pdb.facts.ISetWriter
 import org.eclipse.imp.pdb.facts.IValue
 
-sealed class SetWriter extends ISetWriter {
+sealed class TypelessSetWriter extends ISetWriter {
 
-	val xs: SetBuilder[IValue, Set.Coll] = new SetBuilder(org.eclipse.imp.pdb.facts.impl.persistent.scala.Set.empty)
+	val xs: SetBuilder[IValue, Set.Coll] = new SetBuilder(Set.empty)
 
 	override def insert(ys: IValue*) {
 		xs ++= ys
@@ -30,9 +30,8 @@ sealed class SetWriter extends ISetWriter {
 		xs ++= ys
 	}
 
-	override def done: ISet = {
-		val res = xs.result
-		Set(`type` lub res, res)
+	override def done: ISet = { 
+		TypelessSet(xs.result)
 	}
 
 }

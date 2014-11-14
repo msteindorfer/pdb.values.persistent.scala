@@ -20,18 +20,18 @@ import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
 import collection.JavaConversions.asJavaIterator
 import collection.JavaConversions.mapAsJavaMap
 
-case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IValue])
+case class TypelessMap(xs: TypelessMap.Coll)
 	extends Value with IMap {
 
-	override lazy val t = TypeFactory.getInstance mapType(kt, vt)
+	override def t = ???
 
 	override def isEmpty = xs isEmpty
 
 	override def size = xs size
 
-	override def put(k: IValue, v: IValue) = Map(this.kt lub k.getType, this.vt lub v.getType, xs + (k -> v))
+	override def put(k: IValue, v: IValue) = TypelessMap(xs + (k -> v))
 
-	override def removeKey(k: IValue) = Map(this.kt, this.vt, xs - k)
+	override def removeKey(k: IValue) = TypelessMap(xs - k)
 
 	override def get(k: IValue) = xs getOrElse(k, null)
 
@@ -41,35 +41,32 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
 		case (_, cv) => v == cv
 	}
 
-	override def getKeyType = kt
+	override def getKeyType = ???
 
-	override def getValueType = vt
+	override def getValueType = ???
 
 	override def join(other: IMap): IMap = other match {
-		case Map(okt, ovt, ys) =>
-			Map(this.kt lub okt, this.vt lub ovt, xs ++ ys)
+		case TypelessMap(ys) => TypelessMap(xs ++ ys)
 	}
 
 	override def remove(other: IMap): IMap = other match {
-		case Map(okt, ovt, ys) =>
-			Map(this.kt lub okt, this.vt lub ovt,
-				xs -- ys.keySet)
+		case TypelessMap(ys) => TypelessMap(xs -- ys.keySet)
 	}
 
 	override def compose(other: IMap): IMap = other match {
-		case Map(_, ovt, ys) => Map(kt, ovt, for ((k, v) <- xs if ys contains v) yield (k, ys(v)))
+		case TypelessMap(ys) => TypelessMap(for ((k, v) <- xs if ys contains v) yield (k, ys(v)))
 	}
 
 	override def common(other: IMap) = other match {
-		case Map(okt, ovt, ys) =>
-			Map(this.kt lub okt, this.vt lub ovt,
+		case TypelessMap(ys) =>
+		 TypelessMap(
 				xs filter {
 					case (k, v) => (ys contains k) && (ys(k) isEqual v)
 				})
 	}
 
 	override def isSubMap(other: IMap) = other match {
-		case Map(_, _, ys) => xs.keys forall (k => (ys contains k) && (ys(k) isEqual xs(k)))
+		case TypelessMap(ys) => xs.keys forall (k => (ys contains k) && (ys(k) isEqual xs(k)))
 	}
 
 	override def iterator = xs.keys iterator
@@ -82,15 +79,15 @@ case class Map(kt: Type, vt: Type, xs: scala.collection.immutable.Map[IValue, IV
 	override def accept[T, E <: Throwable](v: IValueVisitor[T, E]): T = v visitMap this
 
 	override def equals(that: Any): Boolean = that match {
-		case other: Map => this.xs equals other.xs
+		case other: TypelessMap => this.xs equals other.xs
 		case _ => false
 	}
 
-	override lazy val hashCode = xs.hashCode
+	override def hashCode = xs.hashCode
 
 }
 
-object Map {
+object TypelessMap {
 	type Coll = collection.immutable.HashMap[IValue, IValue]
 	val empty = collection.immutable.HashMap.empty[IValue, IValue]
 }

@@ -114,8 +114,8 @@ class Set(val et: Type, val xs: Set.Coll)
 }
 
 object Set {
-	type Coll = collection.immutable.Set[IValue]
-	val empty = collection.immutable.Set.empty[IValue]
+	type Coll = collection.immutable.HashSet[IValue]
+	val empty = collection.immutable.HashSet.empty[IValue]
 
 	def apply(et: Type, xs: Coll): ISet =
 		new Set(if (xs isEmpty) TypeFactory.getInstance voidType else et, xs)

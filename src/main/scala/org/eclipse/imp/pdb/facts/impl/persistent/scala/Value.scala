@@ -32,6 +32,13 @@ trait Value extends IValue {
 		throw new IllegalOperationException(
 				"Cannot be viewed as annotatable.", getType());
 	}
+
+	def mayHaveKeywordParameters(): Boolean = false
+
+	def asWithKeywordParameters(): org.eclipse.imp.pdb.facts.IWithKeywordParameters[_ <: org.eclipse.imp.pdb.facts.IValue] = {
+		throw new IllegalOperationException(
+				"Cannot be viewed as annotatable.", getType());
+	}
 	
 	final override def toString: String = {
 		val stream = new StringWriter
