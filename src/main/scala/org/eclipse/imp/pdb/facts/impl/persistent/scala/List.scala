@@ -16,8 +16,8 @@ import org.eclipse.imp.pdb.facts.IValue
 import org.eclipse.imp.pdb.facts.`type`.Type
 import org.eclipse.imp.pdb.facts.`type`.TypeFactory
 import org.eclipse.imp.pdb.facts.visitors.IValueVisitor
-
 import collection.JavaConversions.asJavaIterator
+import java.util.Random
 
 class List(val et: Type, val xs: ListColl)
 	extends Value with IList {
@@ -131,6 +131,10 @@ class List(val et: Type, val xs: ListColl)
 		import ImplicitRelationViewOnList._
 		this
 	}
+
+  def shuffle(x$1: Random): IList = {
+    ???
+  }
 
 }
 

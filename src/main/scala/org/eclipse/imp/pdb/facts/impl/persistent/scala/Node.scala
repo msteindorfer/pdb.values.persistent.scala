@@ -28,7 +28,7 @@ import org.eclipse.imp.pdb.facts.impl.AbstractNode
 
 case class Node(val name: String, val children: Node.ChildrenColl) extends AbstractNode {
 
-	def getType = TypeFactory.getInstance.nodeType
+  override def getType = TypeFactory.getInstance.nodeType
 
 	def set(i: Int, x: IValue) = Node(name, children updated(i, x))
 
@@ -46,7 +46,7 @@ case class Node(val name: String, val children: Node.ChildrenColl) extends Abstr
 	
 	def getValueFactory = new ValueFactory
 	
-	def isEqual(that: IValue): Boolean = NodeFunctions.isEqual(getValueFactory, this, that)
+  override def isEqual(that: IValue): Boolean = NodeFunctions.isEqual(getValueFactory, this, that)
 	
 }
 

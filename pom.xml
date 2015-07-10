@@ -9,8 +9,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
 		
 		<!-- Skip compilation of legacy test dependency -->
 		<maven.test.skip>true</maven.test.skip>
@@ -87,12 +87,12 @@
 		<dependency>
 			<groupId>org.eclipse.imp</groupId>
 			<artifactId>org.eclipse.imp.pdb.values</artifactId>
-			<version>0.4.1.qualifier</version>
+			<version>0.4.3.qualifier</version>
 		</dependency>
 		<dependency>
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
-			<version>2.11.6</version>
+			<version>2.11.7-SNAPSHOT</version>
 		</dependency>
 <!--         <dependency> -->
 <!--             <groupId>org.eclipse.imp</groupId> -->

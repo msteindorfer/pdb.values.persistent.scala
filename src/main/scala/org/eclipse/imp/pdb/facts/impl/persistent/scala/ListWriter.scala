@@ -34,7 +34,9 @@ sealed class ListWriter extends IListWriter {
 
 	override def insertAt(i: Int, ys: Array[IValue], j: Int, n: Int) = this insertAt(i, (ys slice(j, j + n)): _*)
 
-	override def replaceAt(i: Int, x: IValue) = xs update(i, x)
+	override def replaceAt(i: Int, x: IValue): IValue = {
+    val prev = xs(i); xs update(i, x); prev
+  }    
 
 	override def append(ys: IValue*): Unit = xs ++= ys
 
@@ -44,5 +46,9 @@ sealed class ListWriter extends IListWriter {
 		val res = emptyList ++ xs.result
 		List(`type` lub res, res)
 	}
+
+  def get(i: Int): IValue = xs(i)
+
+  def length(): Int = xs.length
 
 }
